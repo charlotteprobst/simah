@@ -70,7 +70,7 @@ jobs:
       - name: Install package dependencies
         run: |
           # Install required packages
-          install.packages(c("devtools", "testthat", "readr", "dplyr", "data.table"))
+          install.packages(c("devtools", "testthat", "readr", "dplyr", "data.table", "remotes"))
           # Install package dependencies
           devtools::install_deps(dependencies = TRUE)
         shell: Rscript {0}
