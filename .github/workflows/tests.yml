@@ -80,9 +80,9 @@ jobs:
       - name: Download data files
         run: |
           echo "Downloading data.rds..." 
-          curl -L -o ./inputs_data/data.rds https://jduro.ddns.net/SIMAH/data.rds
+          curl -L -o inputs_data/data.rds https://jduro.ddns.net/SIMAH/data.rds
           echo "Downloading svy_data.rds..."
-          curl -L -o ./inputs_data/svy_data.rds https://jduro.ddns.net/SIMAH/svy_data.rds
+          curl -L -o inputs_data/svy_data.rds https://jduro.ddns.net/SIMAH/svy_data.rds
         shell: bash {0}
 
       # Step 6: Build and install the package
@@ -95,7 +95,7 @@ jobs:
       - name: Run testthat tests
         run: |
           # Show content of input data
-          ls -hl ./inputs_data
+          ls -la inputs_data
           # Run all tests in the testthat directory
           testthat::test_dir("tests/testthat", reporter = "summary")
         shell: Rscript {0}
