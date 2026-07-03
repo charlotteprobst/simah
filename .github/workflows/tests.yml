@@ -97,8 +97,7 @@ jobs:
       - name: Run testthat tests
         run: |
           # Run all tests in the testthat directory
-          setwd(Sys.getenv("GITHUB_WORKSPACE"))
-          testthat::test_dir("tests/testthat", reporter = "summary")
+          devtools::test(reporter = "summary")
         shell: Rscript {0}
 
       # Step 8: Run tests with coverage (optional, for future enhancement)
@@ -106,8 +105,7 @@ jobs:
         if: always()
         run: |
           # Run tests with more detailed output
-          setwd(Sys.getenv("GITHUB_WORKSPACE"))
-          testthat::test_dir("tests/testthat", reporter = "progress")
+          devtools::test(reporter = "progress")
         shell: Rscript {0}
 
       # Step 9: Upload test results (for debugging)
