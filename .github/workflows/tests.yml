@@ -1,0 +1,117 @@
+# GitHub Actions workflow for running testthat tests
+# This workflow runs all tests in the tests/testthat directory
+# Triggered on push and pull request to any branch
+
+name: testthat tests
+
+on:
+  # Trigger on push to any branch
+  push:
+    branches:
+      - main
+      - develop
+      - codeinput
+      - feature/*
+      - bugfix/*
+      - release/*
+  # Trigger on pull requests
+  pull_request:
+    branches:
+      - main
+      - develop
+  # Allow manual triggering
+  workflow_dispatch:
+
+# Cancel in-progress jobs for the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-that:
+    runs-on: ubuntu-latest
+
+    name: Run testthat tests
+
+    # Environment variables
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up R environment
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.3'
+          use-public-rspm: true
+
+      # Step 3: Install system dependencies
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            libcurl4-openssl-dev \
+            libssl-dev \
+            libxml2-dev \
+            libfontconfig1-dev \
+            libharfbuzz-dev \
+            libfribidi-dev \
+            libfreetype6-dev \
+            libpng-dev \
+            libtiff5-dev \
+            libjpeg-dev
+
+      # Step 4: Install R dependencies
+      - name: Install package dependencies
+        run: |
+          # Install required packages
+          install.packages(c("devtools", "testthat", "readr", "dplyr", "data.table"))
+          # Install package dependencies
+          devtools::install_deps(dependencies = TRUE)
+        shell: Rscript {0}
+
+      # Step 5: Build and install the package
+      - name: Build and install package
+        run: |
+          devtools::load_all(".")
+        shell: Rscript {0}
+
+      # Step 6: Download required data files
+      - name: Download data files
+        run: |
+          # Create inputs_data directory if it doesn't exist
+          mkdir -p inputs_data
+          echo "Downloading data.rds..."
+          curl -L -o inputs_data/data.rds https://jduro.ddns.net/SIMAH/data.rds
+          echo "Downloading svy_data.rds..."
+          curl -L -o inputs_data/svy_data.rds https://jduro.ddns.net/SIMAH/svy_data.rds
+          echo "Data files downloaded successfully"
+
+      # Step 7: Run all testthat tests
+      - name: Run testthat tests
+        run: |
+          # Run all tests in the testthat directory
+          testthat::test_dir("tests/testthat", reporter = "summary")
+        shell: Rscript {0}
+
+      # Step 8: Run tests with coverage (optional, for future enhancement)
+      - name: Run tests with detailed reporter
+        if: always()
+        run: |
+          # Run tests with more detailed output
+          testthat::test_dir("tests/testthat", reporter = "progress")
+        shell: Rscript {0}
+
+      # Step 9: Upload test results (for debugging)
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: .
+          retention-days: 7
