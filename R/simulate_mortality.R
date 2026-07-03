@@ -12,7 +12,7 @@
 simulate_mortality <- function(data, diseases) {
 
   if (rlang::is_empty(diseases)) {  # Returns TRUE if length is 0 or if NULL
-    msg <- "The diseses vector is empty. No risks will be assigned to individuals in the population."
+    msg <- "The diseases vector is empty. No risks will be assigned to individuals in the population."
     log_verbosity(msg, level = 1, type = "warn")
     return(data)
   }

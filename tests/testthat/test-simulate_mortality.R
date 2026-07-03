@@ -1,13 +1,13 @@
 # Load testthat library
 library(testthat)
 
+# Set verbosity to suppress warnings during tests
+options(microsim_verbosity = 0)
+
 # 1. Load the package and data (similar to minimal_test_setup.R)
 # We assume the working directory is the project root
 PackageDirectory <- "."
 devtools::load_all(PackageDirectory)
-
-# Set verbosity to suppress warnings during tests
-options(microsim_verbosity = 0)
 
 test_that("simulate_mortality adds expected columns", {
   # Create minimal test data with required columns
@@ -165,6 +165,7 @@ test_that("simulate_mortality handles empty diseases vector", {
     RR_liver = c(1.0),
     rate_liver = c(0.1)
   )
+  options(microsim_verbosity = 0)
 
   # This should return data unchanged except for type coercion
   result <- simulate_mortality(test_data, diseases = character(0))
