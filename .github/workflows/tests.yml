@@ -97,6 +97,7 @@ jobs:
       - name: Run testthat tests
         run: |
           # Run all tests in the testthat directory
+          setwd(Sys.getenv("GITHUB_WORKSPACE"))
           testthat::test_dir("tests/testthat", reporter = "summary")
         shell: Rscript {0}
 
@@ -105,6 +106,7 @@ jobs:
         if: always()
         run: |
           # Run tests with more detailed output
+          setwd(Sys.getenv("GITHUB_WORKSPACE"))
           testthat::test_dir("tests/testthat", reporter = "progress")
         shell: Rscript {0}
 
