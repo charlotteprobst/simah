@@ -77,23 +77,35 @@ jobs:
 
       # Step 5: Build and install the package
       - name: Build and install package
+        working-directory: ${{ github.workspace }}
         run: |
           devtools::load_all(".")
         shell: Rscript {0}
 
       # Step 6: Download required data files
       - name: Download data files
+        working-directory: ${{ github.workspace }}
         run: |
           # Create inputs_data directory if it doesn't exist
           mkdir -p inputs_data
+          # Verify we are in the correct directory
+          echo "Current directory: $(pwd)"
+          echo "Contents before download:"
+          ls -la inputs_data/ || echo "Directory was empty or did not exist"
+          # Download data files from jduro.ddns.net
           echo "Downloading data.rds..."
           curl -L -o inputs_data/data.rds https://jduro.ddns.net/SIMAH/data.rds
           echo "Downloading svy_data.rds..."
           curl -L -o inputs_data/svy_data.rds https://jduro.ddns.net/SIMAH/svy_data.rds
+          # Verify files were downloaded with sizes
+          echo "Files after download:"
+          ls -la inputs_data/data.rds inputs_data/svy_data.rds
           echo "Data files downloaded successfully"
+        shell: bash {0}
 
       # Step 7: Run all testthat tests
       - name: Run testthat tests
+        working-directory: ${{ github.workspace }}
         run: |
           # Run all tests in the testthat directory
           testthat::test_dir("tests/testthat", reporter = "summary")
