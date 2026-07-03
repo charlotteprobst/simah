@@ -9,10 +9,13 @@ devtools::load_all(PackageDirectory)
 # Define data paths
 DataDirectoryMinimal <- "inputs_data"
 
+# Find the project root directory from inside the test folder
+project_root <- rprojroot::find_package_root_file()
+
 # Load necessary mock data
-basepop <- readr::read_rds(file.path(DataDirectoryMinimal, "data.rds"))
-migration_rates <- readr::read_rds(file.path(DataDirectoryMinimal, "migration_rates.rds"))
-svy_data <- readr::read_rds(file.path(DataDirectoryMinimal, "svy_data.rds")) # formerly brfss
+basepop <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "data.rds"))})
+migration_rates <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "migration_rates.rds"))})
+svy_data <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "svy_data.rds"))})
 
 test_that("add_new_migrants returns correct structure", {
 

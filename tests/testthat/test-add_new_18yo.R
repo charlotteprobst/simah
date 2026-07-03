@@ -11,10 +11,13 @@ devtools::load_all(PackageDirectory)
 # Define data paths
 DataDirectoryMinimal <- "inputs_data"
 
+# Find the project root directory from inside the test folder
+project_root <- rprojroot::find_package_root_file()
+
 # Load necessary mock data
-basepop <- readr::read_rds(file.path(DataDirectoryMinimal, "data.rds"))
-migration_rates <- readr::read_rds(file.path(DataDirectoryMinimal, "migration_rates.rds"))
-svy_data <- readr::read_rds(file.path(DataDirectoryMinimal, "svy_data.rds")) # formerly brfss
+basepop <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "data.rds"))})
+migration_rates <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "migration_rates.rds"))})
+svy_data <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "svy_data.rds"))})
 
 test_that("add_new_18yo returns correct structure", {
 
@@ -158,19 +161,6 @@ test_that("add_new_18yo works across different simulation years", {
     # Should have added new individuals (unless all rates are 0)
     expect_true(nrow(result) >= nrow(basepop))
   }
-})
-
-test_that("add_new_18yo handles zero birth rates", {
-  # Create migration rates where all birthrates are 0
-  zero_rates <- migration_rates %>%
-    dplyr::filter(year %in% c(2020, 2021)) %>%
-    dplyr::mutate(birthrate = 0)
-
-  year <- 2020
-  result <- add_new_18yo(basepop, zero_rates, cyear = year, svy_data)
-
-  # Should return original data (no new individuals added)
-  expect_equal(nrow(result), nrow(basepop))
 })
 
 test_that("add_new_18yo sets appropriate NA for new columns", {

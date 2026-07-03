@@ -10,13 +10,16 @@ devtools::load_all(PackageDirectory)
 # Define data paths
 DataDirectoryMinimal <- "inputs_data"
 
+# Find the project root directory from inside the test folder
+project_root <- rprojroot::find_package_root_file()
+
 # Load necessary mock data
-basepop <- readr::read_rds(file.path(DataDirectoryMinimal, "data.rds"))
+basepop <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "data.rds"))})
 # read in hed model
 hed_model_list <- list(
-  'youngmen' = xgb.load(file.path(DataDirectoryMinimal, "xgbmodel_youngmen.json")),
-  'else'     = xgb.load(file.path(DataDirectoryMinimal, "xgbmodel_else.json")),
-  'oldmen'   = xgb.load(file.path(DataDirectoryMinimal, "xgbmodel_oldmen.json"))
+  'youngmen' = withr::with_dir(project_root, {xgb.load(file.path(DataDirectoryMinimal, "xgbmodel_youngmen.json"))}),
+  'else'     = withr::with_dir(project_root, {xgb.load(file.path(DataDirectoryMinimal, "xgbmodel_else.json"))}),
+  'oldmen'   = withr::with_dir(project_root, {xgb.load(file.path(DataDirectoryMinimal, "xgbmodel_oldmen.json"))})
 )
 
 # 2. Define the test case

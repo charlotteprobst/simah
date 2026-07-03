@@ -3,10 +3,14 @@
 #' @param covid_scenario indicator specifying which COVID scenario to model; 0 (= non-COVID),
 #' 1 (non-COVID before 2020 and after 2022 / COVID in 2020-2022), or 2 (= non-COVID before 2020 / COVID after 2020)
 #' @param cyear current simulation year
+#' @param education_transitions a data frame of non-COVID cumulative transition probabilities for each population category and
+#'      destination education state, with at least \code{cat}, \code{StateTo} and \code{cumsum}
+#' @param education_transitions_covid a data frame of COVID cumulative transition probabilities for each population category and
+#'      destination education state, with at least \code{cat}, \code{StateTo} and \code{cumsum}
 #' @return the synthetic population with education_detailed column updated
 #' @keywords microsimulation and education
 #' @export
-education_update <- function(data, covid_scenario, cyear) {
+education_update <- function(data, covid_scenario, cyear, education_transitions, education_transitions_covid) {
 
   if (covid_scenario == 2) {
     if (cyear >= 2020) {

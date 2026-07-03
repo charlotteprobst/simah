@@ -10,9 +10,12 @@ devtools::load_all(PackageDirectory)
 # Define data paths
 DataDirectoryMinimal <- "inputs_data"
 
+# Find the project root directory from inside the test folder
+project_root <- rprojroot::find_package_root_file()
+
 # Load necessary mock data
-basepop <- readr::read_rds(file.path(DataDirectoryMinimal, "data.rds"))
-alcohol_transitions <- readr::read_rds(file.path(DataDirectoryMinimal, "alcohol_transitions.rds"))
+basepop <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "data.rds"))})
+alcohol_transitions <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "alcohol_transitions.rds"))})
 
 test_that("transition_alcohol returns correct structure", {
 

@@ -20,6 +20,10 @@
 #' @param inflation_factors a vector with inflation factors that are applied to age categories with low
 #'      observed mortality rates (specified in \code{age_inflated}) to stabilize simulated mortality
 #' @param age_inflated a list with age categories to be inflated using \code{inflation_factors}
+#' @param education_transitions a data frame of non-COVID cumulative transition probabilities for each population category and
+#'      destination education state, with at least \code{cat}, \code{StateTo} and \code{cumsum}
+#' @param education_transitions_covid a data frame of COVID cumulative transition probabilities for each population category and
+#'      destination education state, with at least \code{cat}, \code{StateTo} and \code{cumsum}
 #' @param COVID_specific_tps indicator specifying which COVID scenario to model; 0 (= non-COVID),
 #'      1 (non-COVID before 2020 and after 2022 / COVID in 2020-2022), or 2 (= non-COVID before 2020 / COVID after 2020)
 #' @param updatingalcohol indicator for whether to update alcohol use; FALSE or TRUE
@@ -50,6 +54,8 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
                             risk_param,
                             inflation_factors = c(28, 3),
                             age_inflated = list(c("18-24","25-34","35-44","45-54","55-64"), c("65-74", "75-79")),
+                            education_transitions,
+                            education_transitions_covid,
                             COVID_specific_tps = 1,
                             updatingalcohol = TRUE,
                             alcohol_transitions,
@@ -281,7 +287,9 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
 
     # transition education for individuals aged 34 and under
     totransition <- data %>% dplyr::filter(age <= 34)
-    totransition <- education_update(data = totransition, covid_scenario=COVID_specific_tps, cyear=y)
+    totransition <- education_update(data = totransition, covid_scenario=COVID_specific_tps, cyear=y,
+                                     education_transitions = education_transitions,
+                                     education_transitions_covid = education_transitions_covid)
     tostay <- data %>% dplyr::filter(age > 34)
     data <- rbind(totransition, tostay)
 

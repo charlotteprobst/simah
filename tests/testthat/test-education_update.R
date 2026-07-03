@@ -10,10 +10,13 @@ devtools::load_all(PackageDirectory)
 # Define data paths
 DataDirectoryMinimal <- "inputs_data"
 
+# Find the project root directory from inside the test folder
+project_root <- rprojroot::find_package_root_file()
+
 # Load necessary mock data
-basepop <- readr::read_rds(file.path(DataDirectoryMinimal, "data.rds"))
-education_transitions <- readr::read_rds(file.path(DataDirectoryMinimal, "education_transitions.rds"))
-education_transitions_covid <- readr::read_rds(file.path(DataDirectoryMinimal, "education_transitions_covid.rds"))
+basepop <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "data.rds"))})
+education_transitions <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "education_transitions.rds"))})
+education_transitions_covid <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "education_transitions_covid.rds"))})
 
 # 2. Define the test case
 test_that("education_update test non-COVID for year 2020 ", {
@@ -23,7 +26,9 @@ test_that("education_update test non-COVID for year 2020 ", {
 
   # Execute the function
   totransition <- basepop %>% dplyr::filter(age <= 34)
-  result <- education_update(data = totransition, covid_scenario = covid_scenario, cyear=year)
+  result <- education_update(data = totransition, covid_scenario = covid_scenario, cyear=year,
+                             education_transitions = education_transitions,
+                             education_transitions_covid = education_transitions_covid)
 
   # Check that result is a data frame
   expect_s3_class(result, "data.frame")
@@ -39,7 +44,9 @@ test_that("education_update test non-COVID before 2020 and after 2022 / COVID in
 
   # Execute the function
   totransition <- basepop %>% dplyr::filter(age <= 34)
-  result <- education_update(data = totransition, covid_scenario = covid_scenario, cyear=year)
+  result <- education_update(data = totransition, covid_scenario = covid_scenario, cyear=year,
+                             education_transitions = education_transitions,
+                             education_transitions_covid = education_transitions_covid)
 
   # Check that result is a data frame
   expect_s3_class(result, "data.frame")
@@ -55,7 +62,9 @@ test_that("education_update test non-COVID before 2020 / COVID after 2020", {
 
   # Execute the function
   totransition <- basepop %>% dplyr::filter(age <= 34)
-  result <- education_update(data = totransition, covid_scenario = covid_scenario, cyear=year)
+  result <- education_update(data = totransition, covid_scenario = covid_scenario, cyear=year,
+                             education_transitions = education_transitions,
+                             education_transitions_covid = education_transitions_covid)
 
   # Check that result is a data frame
   expect_s3_class(result, "data.frame")
