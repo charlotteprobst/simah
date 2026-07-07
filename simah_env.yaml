@@ -1,0 +1,17 @@
+name: simah_r_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - r-base=4.3.3
+  - r-devtools    # For installing local packages and GitHub repos
+  - r-tidyverse  # Includes dplyr, readr, tidyr, purrr, stringr
+  - r-data.table
+  - r-doparallel
+  - r-remotes
+  - r-rcpp         # Required for some dependencies
+  - r-truncnorm
+  - r-lhs
+  - r-faux
+  - r-xgboost
+  - cmake         # Sometimes needed for compiling R packages
