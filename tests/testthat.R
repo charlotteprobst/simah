@@ -1,5 +1,4 @@
 library(testthat)
 library(simah)
 
-test_check("microsimpackage")
-
+test_check("simah")
