@@ -1,7 +1,6 @@
 # simah: a microsimulation model for estimating the impact of alcohol control policies on population health 
 
 [![Tests](https://github.com/charlotteprobst/simah/actions/workflows/tests.yml/badge.svg)](https://github.com/charlotteprobst/simah/actions/workflows/tests.yml)
-[![Coverage](https://img.shields.io/badge/coverage-auto-blue.svg)](https://github.com/charlotteprobst/simah/actions?query=workflow%3Acoverage)
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 
 ## Overview
