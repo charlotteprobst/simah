@@ -86,8 +86,8 @@ jobs:
           ls -al inputs_data/
         shell: bash {0}
 
-      # Step 6: Build and install the package
-      - name: Build and install package
+      # Step 6: Install package
+      - name: Install package
         run: |
           devtools::load_all(".")
         shell: Rscript {0}
@@ -115,3 +115,13 @@ jobs:
           name: test-results
           path: .
           retention-days: 7
+
+      # Step 10: Report coverage to workflow summary
+      - name: Report coverage
+        run: |
+          install.packages("covr", repos = "https://cloud.r-project.org")
+          devtools::load_all(".")
+          coverage <- covr::package_coverage(".")
+          cov_pct <- round(sum(coverage > 0)/length(coverage)*100, 1)
+          cat(sprintf("## Test Coverage: %.1f%%\n", cov_pct) >> $GITHUB_STEP_SUMMARY)
+        shell: Rscript {0}
