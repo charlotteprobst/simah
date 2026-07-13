@@ -34,6 +34,15 @@
 #' @param hed_model_list a list with machine learning models used to annually update heavy episodic drinking (HED) status
 #' @param counterfactual indicator for whether to model a counterfactual scenario where everyone is at the theoretical
 #'      minimal risk exposure level of alcohol use; 0 or 1
+#' @param policy indicator for whether a policy is modeled; FALSE or TRUE
+#' @param policy_int type of policy being modeled; currently just "tax"
+#' @param policymodel identifier for the policy scenario, numeric
+#' @param year_policy year(s) in which the policy is applied, numeric
+#' @param participation indicator for whether drinking participation is being modeled; FALSE or TRUE
+#' #' @param part_elasticity participation elasticity, i.e., the proportion of individuals who stop drinking following a price or tax increase, numeric
+#' @param cons_elasticity a numeric vector containing mean own-price consumption elasticities for beer, wine, and spirits
+#' @param cons_elasticity_se vector containing standard errors corresponding to consumption elasticities for beer, wine, and spirits
+#' @param r_sim_obs correlation between baseline consumption and individual response to price change, numeric
 #' @param migration_rates a data frame containing age-18 entry and migration rates by race, sex and year,
 #'      with at least columns \code{agecat}, \code{race}, \code{sex}, \code{year}, \code{birthrate}, \code{migrationinrate},
 #'      and \code{migrationoutrate}
@@ -62,6 +71,12 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
                             catcontmodel,
                             hed_model_list,
                             counterfactual = 0,
+                            policy = FALSE, policy_int = "tax", policymodel = 0, year_policy = 1999,
+                            participation = FALSE,
+                            part_elasticity = NULL,
+                            cons_elasticity= NULL,
+                            cons_elasticity_se = NULL,
+                            r_sim_obs = NULL,
                             migration_rates,
                             output = c("demographics", "alcoholcat", "alcoholcont", "mortality"), # sbi - policy_sbi_cascade
                             strata = list(
@@ -86,12 +101,16 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
   RestSummary <- list()
   # PLACEHOLDER: Insert some warnings/plausibility checks, e.g., are data objects provided if needed (COVID TPs etc.)
 
+  if (policy & ( min(year_policy) > maxyear | min(year_policy) < minyear ) ) {
+    log_verbosity("Policy is not within model time frame", level = 1, type = "warn")
+  }
+
 # ===== simulation loop in annual steps [y] from 2000 ====
 
   for (y in minyear:maxyear) {
     log_verbosity(paste("Simulating year", y), level = 1, type = "info")
 
-    if (counterfactual==0 & y >= minyear){
+    if (counterfactual == 0 & y >= minyear){
       # update HED
       data <- update_hed(data, hed_model_list[[1]], hed_model_list[[2]], hed_model_list[[3]])
     }
@@ -106,17 +125,52 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
       data$hed_binary <- FALSE
     }
 
-    if (counterfactual==2 & y >= minyear){
-      # counterfactual: no HED between 0 and 60 g/day
-      data <- data %>%
-          dplyr::mutate(
-            hed_binary = dplyr::case_when(
-              drinkingstatus == FALSE ~ FALSE,
-              drinkingstatus == TRUE & alc_gpd <  60 ~ FALSE,
-              drinkingstatus == TRUE & alc_gpd >= 60 ~ TRUE,
-              TRUE ~ 0
-            )
-          )
+    policy_intervention <- ifelse(policy, "intervention", "no intervention")
+    log_verbosity(paste0("Alcohol policy with ", policy_intervention), level = 1, type = "info")
+
+    if(policy) {
+      policy_type <- switch(
+        policy_int,
+        "tax"   = "Tax",
+        "Unknown policy type"
+      )
+      log_verbosity(paste0("Alcohol policy intervention type is ", policy_type), level = 1, type = "info")
+
+      if(!is.null(scenario)) {
+        beer_change <- scenario[1]
+        wine_change <- scenario[2]
+        spirits_change <- scenario[3]
+
+        scenario_msg <- paste0("Policy changes are: beer ", beer_change*100, "%, wine ",
+                               wine_change*100, "%, spirits ", spirits_change*100, "%")
+        log_verbosity(scenario_msg, level = 1, type = "info")
+      }
+    }
+
+    # to model policy effect on alcohol use
+    if (policy & y %in% year_policy) {
+      if (policy_int %like% "tax") {
+        if (participation) {
+          prob_alcohol_transitions <- prob_alcohol_transition(data, alcohol_transitions)
+        }
+
+        data <- apply_tax_policy(
+          data,
+          scenario,
+          setting,
+          participation,
+          part_elasticity,
+          prob_alcohol_transitions,
+          cons_elasticity,
+          cons_elasticity_se,
+          r_sim_obs
+        )
+
+      }
+
+      # update alcohol categories
+      data <- update_alcohol_cat(data)
+
     }
 
     # create alcohol outputs
@@ -140,7 +194,8 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
             n_hed = sum(hed_binary, na.rm = TRUE),
             hed_prop = mean(hed_binary, na.rm = TRUE),
             seed = seed,
-            nunc = nunc
+            nunc = nunc,
+            policymodel = as.character(policymodel)
           )
       }
 
@@ -169,7 +224,8 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
           dplyr::mutate(
             propsimulation = n / sum(n),
             seed = seed,
-            nunc = nunc
+            nunc = nunc,
+            policymodel = as.character(policymodel)
           ) %>%
           dplyr::ungroup()
       }
@@ -187,7 +243,8 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
                          n_hed = sum(hed_binary),
                          hed_prop = mean(hed_binary, na.rm = TRUE),
                          seed = seed,
-                         nunc = nunc
+                         nunc = nunc,
+                         policymodel = as.character(policymodel)
           )
       }
 
@@ -211,14 +268,15 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
                            n_hed = sum(hed_binary),
                            hed_prop = mean(hed_binary, na.rm = TRUE),
                            seed = seed,
-                           nunc = nunc
+                           nunc = nunc,
+                           policymodel = as.character(policymodel)
           )
       }
     }
 
     # store summary of the synthetic population
     PopPerYear[[paste(y)]] <- data %>%
-      dplyr::mutate(year = y, seed = seed, nunc = nunc)
+      dplyr::mutate(year = y, seed = seed, nunc = nunc, policymodel = policymodel)
 
     # MORTALITY
     # simulate mortality for causes that are not explicitly modelled ("REST");
@@ -309,12 +367,8 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
       }
     }
 
-    # age everyone by 1 year and update age category
-    age_breaks <- c(0, 19, 24, 34, 44, 54, 64, 74, 100)
-    age_groups <- c("15-19", "20-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75-79")
-    data <- data %>%
-      dplyr::mutate(age = age + 1,
-                    agecat = cut(age, breaks = age_breaks, labels = age_groups))
+    # age everyone by 1 year
+    data <- data %>% dplyr::mutate(age = age + 1)
 
     # remove anyone over 79
     data <- subset(data, age <= 79)
@@ -339,17 +393,17 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
   # if ("mortality" %in% output) {
   if ("mortality" %in% output & !is.null(diseases)) {
     Summary$mortality <- postprocess_mortality(DiseaseSummary, mort_data = NULL) %>%
-      dplyr::mutate(seed = seed, nunc = nunc)
+      dplyr::mutate(seed = seed, nunc = nunc, policymodel = policymodel)
   } else if ("mortality" %in% output & is.null(diseases)) {
     Summary$mortality <- lapply(names(RestSummary), function(y) {
       RestSummary[[paste(y)]] %>% dplyr::mutate(year = y)
     }) %>%
-      do.call(rbind, .) %>% dplyr::mutate(seed = seed, nunc = nunc)
+      do.call(rbind, .) %>% dplyr::mutate(seed = seed, nunc = nunc, policymodel = policymodel)
   }
 
   # --- store demographics output in summary ---
   if ("demographics" %in% output) {
-    base_strata <- c("year", "seed", "nunc")
+    base_strata <- c("year", "seed", "nunc", "policymodel")
     full_strata <- unique(c(base_strata, strata[["demographics"]])) # user-defined strata
 
     age_breaks <- c(0, 18, 24, 29, 34, 39, 44, 49, 54, 59, 64, 69, 74, 100)

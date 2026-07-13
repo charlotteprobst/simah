@@ -65,6 +65,7 @@ test_that("microsimulation runs without errors", {
       catcontmodel = catcontmodel,
       hed_model_list = hed_model_list,
       counterfactual = 0,
+      policy = FALSE,
       migration_rates = migration_rates,
       output = output,
       strata = strata,
