@@ -1,13 +1,15 @@
 Package: simah
-Title: Microsimulation for estimating the impact of alcohol control policies on population health
+Title: SIMAH microsimulation model: Simulation of alcohol control policies for health equity
 Version: 0.1.0
 Authors@R: c(
     person("Charlotte", "Probst", email = "charlotte.probst@camh.ca", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-4360-697X")),
     person("Julia", "Lemp", email = "julia.lemp@uni-heidelberg.de", role = c("aut"), comment = c(ORCID = "0000-0002-1524-3641")),
     person("Xinyi", "Kou", email = "x.kou@sheffield.ac.uk", role = c("aut"), comment = c(ORCID = "0000-0002-3635-6178")),
-    person("João António", "Fialho Vilas Boas Duro", email = "j.a.duro@sheffield.ac.uk", role = c("aut"), comment = c(ORCID = "0000-0002-7684-4707"))
+    person("Charlotte", "Buckley", email = "charlotte.buckley@liverpool.ac.uk", role = c("aut"), comment = c(ORCID = "0000-0002-8430-0347")),
+    person("João António", "Fialho Vilas Boas Duro", email = "j.a.duro@sheffield.ac.uk", role = c("aut"), comment = c(ORCID = "0000-0002-7684-4707")),
+    person("Robin", "Purshouse", email = "r.purshouse.sheffield.ac.uk", role = c("aut"), comment = c(ORCID = "0000-0001-5880-1925"))
     )
-Description: Microsimulation for estimating the effects of alcohol control policies on alcohol consumption levels, mortality rates, and health inequalities within population subgroups.
+Description: Microsimulation model for estimating the effects of alcohol control policies on alcohol consumption levels, mortality rates, years of live lost, and health inequalities within population subgroups.
 License: `use_lgpl_license()`
 Imports: 
     dplyr,
