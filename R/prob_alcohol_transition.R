@@ -7,7 +7,6 @@
 #' @keywords microsimulation, alcohol
 #' @export
 prob_alcohol_transition <- function(data, model) {
-  print("get probabilities to stop drinking")
 
   # create a data set with the required variables dummy coded
   data_prediction <- data %>%
