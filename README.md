@@ -50,8 +50,8 @@ conda activate simah_r_env
 The model requires external data files for simulation:
 ```bash
 # Download required data files
-curl -L -o inputs_data/data.rds https://jduro.ddns.net/SIMAH/data.rds
-curl -L -o inputs_data/svy_data.rds https://jduro.ddns.net/SIMAH/svy_data.rds
+curl -L -o inputs_data/data.rds https://figshare.com/ndownloader/files/65734905?private_link=815877ea16ec0d611e36
+curl -L -o inputs_data/svy_data.rds https://figshare.com/ndownloader/files/65734908?private_link=815877ea16ec0d611e36
 ```
 
 ## Usage
@@ -98,7 +98,9 @@ devtools::check()
 - Charlotte Probst (principal): [charlotte.probst@camh.ca](mailto:charlotte.probst@camh.ca) | [ORCID](https://orcid.org/0000-0003-4360-697X)
 - Julia Lemp: [julia.lemp@uni-heidelberg.de](mailto:julia.lemp@uni-heidelberg.de) | [ORCID](https://orcid.org/0000-0002-1524-3641)
 - Xinyi Kou: [x.kou@sheffield.ac.uk](mailto:x.kou@sheffield.ac.uk) | [ORCID](https://orcid.org/0000-0002-3635-6178)
+- Charlotte Buckley: [charlotte.buckley@liverpool.ac.uk](mailto:charlotte.buckley@liverpool.ac.uk) | [ORCID](https://orcid.org/0000-0002-8430-0347)
 - João A. Duro: [j.a.duro@sheffield.ac.uk](mailto:j.a.duro@sheffield.ac.uk) | [ORCID](https://orcid.org/0000-0002-7684-4707)
+- Robin Purshouse: [r.purshouse.sheffield.ac.uk](mailto:r.purshouse.sheffield.ac.uk) | [ORCID](https://orcid.org/0000-0001-5880-1925)
 
 ## License
 
