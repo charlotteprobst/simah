@@ -34,9 +34,8 @@
 #' @param hed_model_list a list with machine learning models used to annually update heavy episodic drinking (HED) status
 #' @param counterfactual indicator for whether to model a counterfactual scenario where everyone is at the theoretical
 #'      minimal risk exposure level of alcohol use; 0 or 1
-#' @param policy a string that indicates the type of policy being modeled; allowed values are "none" or "tax
+#' @param policy a string that indicates the type of policy being modeled; current allowed values are "none" and "basic"
 #' @param year_policy year(s) in which the policy is applied, numeric
-#' @param scenario a numeric vector containing price changes for beer, wine, and spirits
 #' @param cons_elasticity a numeric vector containing mean own-price consumption elasticities for beer, wine, and spirits
 #' @param cons_elasticity_se vector containing standard errors corresponding to consumption elasticities for beer, wine, and spirits
 #' @param r_sim_obs correlation between baseline consumption and individual response to price change, numeric
@@ -68,8 +67,8 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
                             catcontmodel,
                             hed_model_list,
                             counterfactual = 0,
-                            policy = "tax", year_policy = 1999,
-                            scenario = 0.1,
+                            policy = "basic",  # allowed values are none and basic
+                            year_policy = 1999,
                             cons_elasticity = -0.1078,
                             cons_elasticity_se = 0.0442,
                             r_sim_obs = 0.8,
@@ -95,18 +94,10 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
   # Check if the chosen policy is one of the available ones
   apply_policy <- ifelse(policy != "none", TRUE, FALSE)
   policymodel <- switch(policy,
-                        "tax"  = 1,
+                        "basic"  = 1,
                         "none" = 0,
                         stop(sprintf("Error: '%s' is not a valid policy type!", policy))
   )
-
-  if(apply_policy) {
-    if(rlang::is_empty(scenario)) {
-      fmsg <- "If a policy is selected then scenario with changes to drinks prices cannot be undefined!"
-      log_verbosity(fmsg, level = 0, type = "error")
-      stop(sprintf(fmsg))
-    }
-  }
 
   if (apply_policy & ( min(year_policy) > maxyear | min(year_policy) < minyear ) ) {
     log_verbosity("Policy is not within model time frame", level = 1, type = "warn")
@@ -117,14 +108,6 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
 
   if(apply_policy) {
     log_verbosity(paste0("Alcohol policy intervention type is ", policy), level = 1, type = "info")
-
-    beer_change <- scenario[1]
-    wine_change <- scenario[2]
-    spirits_change <- scenario[3]
-
-    scenario_msg <- paste0("Policy changes are: beer ", beer_change*100, "%, wine ",
-                           wine_change*100, "%, spirits ", spirits_change*100, "%")
-    log_verbosity(scenario_msg, level = 1, type = "info")
   }
 
   ## SIMULATION START ##
@@ -158,9 +141,8 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
     # to model policy effect on alcohol use
     if (apply_policy & y %in% year_policy) {
 
-      data <- apply_tax_policy(
+      data <- apply_basic_policy(
         data,
-        scenario,
         cons_elasticity,
         cons_elasticity_se,
         r_sim_obs
