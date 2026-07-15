@@ -13,7 +13,6 @@ on:
       - feature/*
       - bugfix/*
       - release/*
-      - JoaoUpdate
   # Trigger on pull requests
   pull_request:
     branches:
