@@ -46,9 +46,8 @@ remove_individuals <- function(data, disease, age_inflated, inflation_factors) {
     # identify each individual's relative risk
     RRs <- toremove %>% dplyr::ungroup() %>% dplyr::select(!!rlang::sym(paste0('RR_', disease)))
     RRs <- as.numeric(unlist(RRs))
-    # sample individuals to be removed conditional on their relative risk and using stochastic universal sampling
-    # samples <- gatbxr::sus(RRs, N)
-    samples <- stochastic_universal_sampling(RRs, N)
+    # sample individuals to be removed conditional on their relative risk and using ppswor
+    samples <- ppswor(RRs, N)
     toremove <- toremove[samples, ]
     return(toremove)
   }

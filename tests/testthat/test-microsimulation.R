@@ -65,6 +65,7 @@ test_that("microsimulation runs without errors", {
       catcontmodel = catcontmodel,
       hed_model_list = hed_model_list,
       counterfactual = 0,
+      policy = "none",  # allowed values are tax or none
       migration_rates = migration_rates,
       output = output,
       strata = strata,
@@ -99,6 +100,7 @@ test_that("microsimulation with counterfactual = 0 runs normally", {
     catcontmodel = catcontmodel,
     hed_model_list = hed_model_list,
     counterfactual = 0,
+    policy = "none",  # allowed values are tax or none
     migration_rates = migration_rates,
     output = output,
     strata = strata,
@@ -132,6 +134,7 @@ test_that("microsimulation with counterfactual = 1 sets all alc_gpd to zero", {
     catcontmodel = catcontmodel,
     hed_model_list = hed_model_list,
     counterfactual = 1,
+    policy = "none",  # allowed values are tax or none
     migration_rates = migration_rates,
     output = c("alcoholcont", "hed"),
     strata = strata,
@@ -145,4 +148,44 @@ test_that("microsimulation with counterfactual = 1 sets all alc_gpd to zero", {
   hed_table <- result$hed
   expect_true(all(alcohol_table[alcohol_table$year == 2000, ]$meansimulation == 0))
   expect_true(all(hed_table[hed_table$year == 2000, ]$n_hed == 0))
+})
+
+test_that("microsimulation with policy tax", {
+
+  result <- microsimulation(
+    data = basepop,
+    svy_data = svy_data,
+    maxyear = 2000,
+    mort_data = mort_data,
+    base_rates = base_rates,
+    diseases = diseases,
+    risk_param = risk_param,
+    inflation_factors = inflation_factors,
+    age_inflated = age_inflated,
+    education_transitions = education_transitions,
+    education_transitions_covid = education_transitions_covid,
+    COVID_specific_tps = 1,
+    updatingalcohol = TRUE,
+    alcohol_transitions = alcohol_transitions,
+    catcontmodel = catcontmodel,
+    hed_model_list = hed_model_list,
+    counterfactual = 0,
+    policy = "tax",  # allowed values are tax or none
+    year_policy = 2000,
+    scenario = 0.1,
+    cons_elasticity = -0.1078,
+    cons_elasticity_se = 0.0442,
+    r_sim_obs = 0.8,
+    migration_rates = migration_rates,
+    output = output,
+    strata = strata,
+    seed = 1, nunc = 1, microsim_verbosity = 0
+  )
+
+  # Check that result is a list
+  expect_type(result, "list")
+
+  # Check that all requested output types are present
+  expected_outputs <- c("demographics", "alcoholcat", "alcoholcont", "hed", "hed_cat", "mortality")
+  expect_true(all(expected_outputs %in% names(result)))
 })
