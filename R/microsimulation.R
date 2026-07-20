@@ -28,6 +28,8 @@
 #' @param nunc numeric identifier for the unique combination of microsimulation parameters
 #' @param microsim_verbosity integer controlling output level: 0 = silent (only errors),
 #'      1 = default (progress info), 2+ = full verbose (detailed logs)
+#' @param datalist a list of dataframes with data that can be provided manually, and is required for this package.
+#' This input is set to NULL by default, which means that the data will be loaded instead by the read_data function.
 #' @return a list containing outputs specified in \code{output}, summarized by \code{strata}, for each simulated year
 #' @keywords microsimulation, main function
 #' @export
@@ -50,14 +52,19 @@ microsimulation <- function(maxyear = 2002,
                               demographics = c("sex", "agecat", "education", "race"),
                               mortality = c("sex", "agecat", "education", "race")
                             ),
-                            seed = 1, nunc = 1, microsim_verbosity = 0
+                            seed = 1, nunc = 1, microsim_verbosity = 0,
+                            datalist = NULL
                             ){
   set.seed(seed)
 
   options(microsim_verbosity = microsim_verbosity)
 
   # READ DATA
-  data_list <- read_data()
+  if (is.null(datalist)) {
+    data_list <- read_data()
+  } else {
+    data_list <- datalist
+  }
   data <- data_list[["data"]]
   svy_data <- data_list[["svy_data"]]
   mort_data <- data_list[["mort_data"]]

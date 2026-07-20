@@ -1,6 +1,5 @@
 # Load testthat library
 library(testthat)
-library(xgboost)
 
 # 1. Load the package and data (similar to minimal_test_setup.R)
 # We assume the working directory is the project root
@@ -18,9 +17,9 @@ basepop <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirector
 risk_param <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "risk_param.rds"))})
 # read in hed model
 hed_model_list <- list(
-  'youngmen' = withr::with_dir(project_root, {xgb.load(file.path(DataDirectoryMinimal, "xgbmodel_youngmen.json"))}),
-  'else'     = withr::with_dir(project_root, {xgb.load(file.path(DataDirectoryMinimal, "xgbmodel_else.json"))}),
-  'oldmen'   = withr::with_dir(project_root, {xgb.load(file.path(DataDirectoryMinimal, "xgbmodel_oldmen.json"))})
+  'youngmen' = withr::with_dir(project_root, {xgboost::xgb.load(file.path(DataDirectoryMinimal, "xgbmodel_youngmen.json"))}),
+  'else'     = withr::with_dir(project_root, {xgboost::xgb.load(file.path(DataDirectoryMinimal, "xgbmodel_else.json"))}),
+  'oldmen'   = withr::with_dir(project_root, {xgboost::xgb.load(file.path(DataDirectoryMinimal, "xgbmodel_oldmen.json"))})
 )
 
 # 2. Define the test case

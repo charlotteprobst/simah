@@ -1,4 +1,3 @@
-
 # Load testthat library
 library(testthat)
 
