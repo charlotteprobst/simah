@@ -238,7 +238,7 @@ test_that("read_data hed_model_list has expected model structure", {
   for (model_name in names(hed_model_list)) {
     model <- hed_model_list[[model_name]]
 
-    # XGBoost models should be lists
-    inherits(model, "xgb.Booster")
+    # Check that the model inherits from xgb.Booster
+    expect_true(inherits(model, "xgb.Booster"))
   }
 })
