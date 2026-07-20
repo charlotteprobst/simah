@@ -31,11 +31,13 @@ read_data <- function() {
 
   # Load config file
   config_file <- file.path(project_root, "config/default.yaml")
-  input_config <- read_yaml(config_file)
+  input_config <- yaml::read_yaml(config_file)
 
+  # Folder with data
   DataDirectoryMinimal <- input_config[["data_dir"]]
-  basedata <- input_config[["basedata"]]
 
+  # Base data
+  basedata <- input_config[["basedata"]]
   basepop <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, basedata[["data"]]))})
   svy_data <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, basedata[["svy_data"]]))}) # formerly brfss
   mort_data <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, basedata[["mort_data"]]))}) # formerly death_counts; already processed
@@ -47,11 +49,12 @@ read_data <- function() {
   catcontmodel <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, basedata[["catcontmodel"]]))})
   migration_rates <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, basedata[["migration_rates"]]))})
 
+  # HED data
   heddata <- input_config[["hevdata"]]
   hed_model_list <- list(
-    'youngmen' = withr::with_dir(project_root, {xgb.load(file.path(DataDirectoryMinimal, heddata[["youngmen"]]))}),
-    'else'     = withr::with_dir(project_root, {xgb.load(file.path(DataDirectoryMinimal, heddata[["else"]]))}),
-    'oldmen'   = withr::with_dir(project_root, {xgb.load(file.path(DataDirectoryMinimal, heddata[["oldmen"]]))})
+    'youngmen' = withr::with_dir(project_root, {xgboost::xgb.load(file.path(DataDirectoryMinimal, heddata[["youngmen"]]))}),
+    'else'     = withr::with_dir(project_root, {xgboost::xgb.load(file.path(DataDirectoryMinimal, heddata[["else"]]))}),
+    'oldmen'   = withr::with_dir(project_root, {xgboost::xgb.load(file.path(DataDirectoryMinimal, heddata[["oldmen"]]))})
   )
 
   outlist <- list(data = basepop, svy_data = svy_data, mort_data = mort_data, base_rates = base_rates, risk_param = risk_param,

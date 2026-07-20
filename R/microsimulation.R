@@ -31,7 +31,7 @@
 #' @return a list containing outputs specified in \code{output}, summarized by \code{strata}, for each simulated year
 #' @keywords microsimulation, main function
 #' @export
-microsimulation <- function(maxyear = 2030,
+microsimulation <- function(maxyear = 2002,
                             diseases = c("AUD", "DM", "HLVDC", "HYPHD", "IHD", "IJ", "ISTR", "LVDC", "MVACC", "UIJ"),
                             inflation_factors = c(28, 3),
                             age_inflated = list(c("18-24","25-34","35-44","45-54","55-64"), c("65-74", "75-79")),
@@ -43,14 +43,14 @@ microsimulation <- function(maxyear = 2030,
                             cons_elasticity = -0.1078,
                             cons_elasticity_se = 0.0442,
                             r_sim_obs = 0.8,
-                            output = c("demographics", "alcoholcat", "alcoholcont", "mortality"), # sbi - policy_sbi_cascade
+                            output = c("demographics", "alcoholcat", "alcoholcont", "hed", "hed_cat", "mortality"), # sbi - policy_sbi_cascade
                             strata = list(
                               alcoholcat  = c("sex", "agecat", "education", "race"),
                               alcoholcont = c("sex", "agecat", "education", "race"),
                               demographics = c("sex", "agecat", "education", "race"),
                               mortality = c("sex", "agecat", "education", "race")
                             ),
-                            seed = 1, nunc = 1, microsim_verbosity = 1
+                            seed = 1, nunc = 1, microsim_verbosity = 0
                             ){
   set.seed(seed)
 

@@ -20,6 +20,18 @@ strata <- list(
   mortality = c("sex", "agecat", "education", "race")
 )
 
+test_that("microsimulation runs with default parameters", {
+
+  result <- microsimulation()
+
+  # Check that result is a list
+  expect_type(result, "list")
+
+  # Check that all requested output types are present
+  expected_outputs <- c("demographics", "alcoholcat", "alcoholcont", "hed", "hed_cat", "mortality")
+  expect_true(all(expected_outputs %in% names(result)))
+})
+
 test_that("microsimulation runs without errors", {
 
   result <- microsimulation(
