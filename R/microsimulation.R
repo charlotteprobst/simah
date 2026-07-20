@@ -5,33 +5,14 @@
 #' and population \code{strata}. Essential input data (e.g., synthetic baseline population in 2000) and model parameters
 #' (e.g., mortality statistics, education and alcohol transitions, and parameters linking alcohol consumption to specific causes of death)
 #' must be supplied.
-#' @param data a data frame containing the synthetic baseline population, with at least columns \code{ID}, \code{age}, \code{sex}, \code{race},
-#'      \code{education}, \code{education_detailed}, \code{drinkingstatus}, \code{alc_cat}, \code{alc_gpd}, \code{formerdrinker}
-#' @param svy_data a survey data frame to supply 18-year-olds and migrants joining the synthetic population over time, with at least
-#'      columns \code{YEAR}, \code{age}, \code{sex}, \code{race}, \code{education}, \code{education_detailed}, \code{drinkingstatus},
-#'      \code{alc_cat}, \code{alc_gpd}, \code{formerdrinker}
 #' @param maxyear a numeric value of the maximum simulation year
-#' @param mort_data a data frame containing the cause-specific death counts by population subgroup and year, with at least columns \code{year},
-#'      \code{cat} as well as \code{CAUSEmort} variables
-#' @param base_rates a data frame containing the cause-specific mortality base rates by population subgroup and year, representing mortality
-#'      rates at the theoretical minimal risk exposure level, with at least \code{year}, \code{cat} as well as \code{rate_CAUSE} variables
 #' @param diseases a vector of specific causes of death that are modelled explicitly in relation to alcohol use
-#' @param risk_param a data frame containing the risk function parameters for all causes of death specified in \code{diseases}
 #' @param inflation_factors a vector with inflation factors that are applied to age categories with low
 #'      observed mortality rates (specified in \code{age_inflated}) to stabilize simulated mortality
 #' @param age_inflated a list with age categories to be inflated using \code{inflation_factors}
-#' @param education_transitions a data frame of non-COVID cumulative transition probabilities for each population category and
-#'      destination education state, with at least \code{cat}, \code{StateTo} and \code{cumsum}
-#' @param education_transitions_covid a data frame of COVID cumulative transition probabilities for each population category and
-#'      destination education state, with at least \code{cat}, \code{StateTo} and \code{cumsum}
 #' @param COVID_specific_tps indicator specifying which COVID scenario to model; 0 (= non-COVID),
 #'      1 (non-COVID before 2020 and after 2022 / COVID in 2020-2022), or 2 (= non-COVID before 2020 / COVID after 2020)
 #' @param updatingalcohol indicator for whether to update alcohol use; FALSE or TRUE
-#' @param alcohol_transitions a data frame containing the coefficients of the ordinal regression model to inform transitions between
-#'      alcohol use categories
-#' @param catcontmodel a data frame containing the parameters of the beta distributions of grams per day by alcohol use category and
-#'      population subgroup
-#' @param hed_model_list a list with machine learning models used to annually update heavy episodic drinking (HED) status
 #' @param counterfactual indicator for whether to model a counterfactual scenario where everyone is at the theoretical
 #'      minimal risk exposure level of alcohol use; 0 or 1
 #' @param policy a string that indicates the type of policy being modeled; current allowed values are "none" and "basic"
@@ -39,9 +20,6 @@
 #' @param cons_elasticity a numeric vector containing mean own-price consumption elasticities for beer, wine, and spirits
 #' @param cons_elasticity_se vector containing standard errors corresponding to consumption elasticities for beer, wine, and spirits
 #' @param r_sim_obs correlation between baseline consumption and individual response to price change, numeric
-#' @param migration_rates a data frame containing age-18 entry and migration rates by race, sex and year,
-#'      with at least columns \code{agecat}, \code{race}, \code{sex}, \code{year}, \code{birthrate}, \code{migrationinrate},
-#'      and \code{migrationoutrate}
 #' @param output a character vector specifying the types of outputs to summarize in each annual cycle of the simulation; options include
 #'      "demographics", "alcoholcat", "alcoholcont", and "mortality"
 #' @param strata a named list specifying stratification variables for each output type; options include "sex", "agecat", "education",
@@ -53,26 +31,18 @@
 #' @return a list containing outputs specified in \code{output}, summarized by \code{strata}, for each simulated year
 #' @keywords microsimulation, main function
 #' @export
-microsimulation <- function(data, svy_data, maxyear = 2030,
-                            mort_data, base_rates,
+microsimulation <- function(maxyear = 2030,
                             diseases = c("AUD", "DM", "HLVDC", "HYPHD", "IHD", "IJ", "ISTR", "LVDC", "MVACC", "UIJ"),
-                            risk_param,
                             inflation_factors = c(28, 3),
                             age_inflated = list(c("18-24","25-34","35-44","45-54","55-64"), c("65-74", "75-79")),
-                            education_transitions,
-                            education_transitions_covid,
                             COVID_specific_tps = 1,
                             updatingalcohol = TRUE,
-                            alcohol_transitions,
-                            catcontmodel,
-                            hed_model_list,
                             counterfactual = 0,
                             policy = "basic",  # allowed values are none and basic
                             year_policy = 1999,
                             cons_elasticity = -0.1078,
                             cons_elasticity_se = 0.0442,
                             r_sim_obs = 0.8,
-                            migration_rates,
                             output = c("demographics", "alcoholcat", "alcoholcont", "mortality"), # sbi - policy_sbi_cascade
                             strata = list(
                               alcoholcat  = c("sex", "agecat", "education", "race"),
@@ -85,6 +55,20 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
   set.seed(seed)
 
   options(microsim_verbosity = microsim_verbosity)
+
+  # READ DATA
+  data_list <- read_data()
+  data <- data_list[["data"]]
+  svy_data <- data_list[["svy_data"]]
+  mort_data <- data_list[["mort_data"]]
+  base_rates <- data_list[["base_rates"]]
+  risk_param <- data_list[["risk_param"]]
+  education_transitions <- data_list[["education_transitions"]]
+  education_transitions_covid <- data_list[["education_transitions_covid"]]
+  alcohol_transitions <- data_list[["alcohol_transitions"]]
+  catcontmodel <- data_list[["catcontmodel"]]
+  migration_rates <- data_list[["migration_rates"]]
+  hed_model_list <- data_list[["hed_model_list"]]
 
   # set start year of microsimulation
   minyear <- 2000

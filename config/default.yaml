@@ -1,0 +1,19 @@
+
+data_dir: 'inputs_data'
+
+basedata:
+  data: 'data.rds'
+  svy_data: 'svy_data.rds'
+  mort_data: 'mort_data.rds'
+  base_rates: 'base_rates.rds'
+  risk_param: 'risk_param.rds'
+  education_transitions: 'education_transitions.rds'
+  education_transitions_covid: 'education_transitions_covid.rds'
+  alcohol_transitions: 'alcohol_transitions.rds'
+  catcontmodel: 'catcontmodel.rds'
+  migration_rates: 'migration_rates.rds'
+
+hevdata:
+  youngmen: 'xgbmodel_youngmen.json'
+  else: 'xgbmodel_else.json'
+  oldmen: 'xgbmodel_oldmen.json'
