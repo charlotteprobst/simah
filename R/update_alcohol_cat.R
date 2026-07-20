@@ -7,7 +7,7 @@
 update_alcohol_cat <- function(data) {
   data <- data %>%
     dplyr::mutate(
-      alc_cat = case_when(
+      alc_cat = dplyr::case_when(
         alc_gpd == 0 ~ "Non-drinker",
         sex == "m" & alc_gpd > 0 & alc_gpd <= 40 ~ "Low risk",
         sex == "f" & alc_gpd > 0 & alc_gpd <= 20 ~ "Low risk",
