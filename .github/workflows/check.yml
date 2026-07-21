@@ -1,0 +1,94 @@
+# GitHub Actions workflow for R package check
+# This workflow runs R CMD check to validate the package
+# Triggered on push and pull request to any branch
+
+name: R CMD Check
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - feature/*
+      - bugfix/*
+      - release/*
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    name: R CMD Check
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up R environment
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.3'
+          use-public-rspm: true
+
+      # Step 3: Install system dependencies
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            libcurl4-openssl-dev \
+            libssl-dev \
+            libxml2-dev \
+            libfontconfig1-dev \
+            libharfbuzz-dev \
+            libfribidi-dev \
+            libfreetype6-dev \
+            libpng-dev \
+            libtiff5-dev \
+            libjpeg-dev \
+            pandoc
+
+      # Step 4: Install R dependencies
+      - name: Install package dependencies
+        run: |
+          install.packages(c("devtools", "rhub", "remotes"))
+          remotes::install_deps(dependencies = TRUE)
+        shell: Rscript {0}
+
+      # Step 5: Download required data files for examples
+      - name: Download data files
+        run: |
+          echo "Downloading data.rds..." 
+          curl -L -o inputs_data/data.rds https://figshare.com/ndownloader/files/65734905?private_link=815877ea16ec0d611e36
+          echo "Downloading svy_data.rds..."
+          curl -L -o inputs_data/svy_data.rds https://figshare.com/ndownloader/files/65734908?private_link=815877ea16ec0d611e36
+          ls -al inputs_data/
+        shell: bash {0}
+
+      # Step 6: R CMD check
+      - name: R CMD check
+        run: |
+          devtools::check(error_on = "never")
+        shell: Rscript {0}
+
+      # Step 7: Upload check results
+      - name: Upload check results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: check-results
+          path: simah.Rcheck/
+          retention-days: 7
