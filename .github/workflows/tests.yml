@@ -82,8 +82,6 @@ jobs:
           curl -L -o inputs_data/data.rds https://figshare.com/ndownloader/files/65734905?private_link=815877ea16ec0d611e36
           echo "Downloading svy_data.rds..."
           curl -L -o inputs_data/svy_data.rds https://figshare.com/ndownloader/files/65734908?private_link=815877ea16ec0d611e36
-          echo "Showing the content of the input data folder"
-          ls -al inputs_data/
         shell: bash {0}
 
       # Step 6: Install package

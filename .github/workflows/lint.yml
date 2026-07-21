@@ -47,5 +47,5 @@ jobs:
 
       - name: Run lintr
         run: |
-          lintr::lint("R/")
+          lintr::lint_dir("R")
         shell: Rscript {0}
