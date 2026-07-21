@@ -1,14 +1,17 @@
 #' @title Add new 18-year-old cohort
-#' @description Add new 18-year-old individuals into the synthetic population for a given simulation year.
-#'              The number of entrants is determined using age-18 entry (birth) rates by sex and race and ethnicity (race).
-#'              Individuals are sampled from survey data to match the required demographic subgroups.
-#' @param data a data frame containing the synthetic population, with at least columns \code{ID}, \code{age}, \code{sex}, \code{race}
-#' @param migration_rates a data frame containing age-18 entry (birth) rates by race, sex and year,
-#'                        with at least columns \code{agecat}, \code{race}, \code{sex}, \code{year}, and \code{birthrate}
-#' @param svy_data a survey data frame with at least columns \code{YEAR}, \code{age}, \code{sex}, \code{race}, \code{education},
-#'                 \code{drinkingstatus}, \code{alc_gpd}, \code{BMI}, \code{income}, \code{formerdrinker}, \code{education_detailed}, \code{alc_cat}
+#' @description Add new 18-year-old individuals into the synthetic population for a given simulation year. The number
+#' of entrants is determined using age-18 entry (birth) rates categorised by sex and race and ethnicity. Individuals
+#' are sampled from survey data to match the required demographic subgroups.
+#' @param data a data frame containing the synthetic population, with at least columns \code{ID}, \code{age},
+#' \code{sex}, \code{race}
+#' @param migration_rates a data frame containing age-18 entry (birth) rates by race, sex and year, with at least
+#' columns \code{agecat}, \code{race}, \code{sex}, \code{year}, and \code{birthrate}
+#' @param svy_data a survey data frame with at least columns \code{YEAR}, \code{age}, \code{sex}, \code{race},
+#' \code{education}, \code{drinkingstatus}, \code{alc_gpd}, \code{BMI}, \code{income}, \code{formerdrinker},
+#' \code{education_detailed}, \code{alc_cat}
 #' @param cyear current simulation year
-#' @return a data frame identical to \code{data}, with newly added 18-year-old individuals appended to the synthetic population
+#' @return a data frame identical to \code{data}, with newly added 18-year-old individuals appended to the synthetic
+#' population
 #' @keywords births, population entry, 18-year-old population
 #' @export
 add_new_18yo <- function(data, migration_rates, cyear, svy_data) {
@@ -29,7 +32,8 @@ add_new_18yo <- function(data, migration_rates, cyear, svy_data) {
     dplyr::select(agecat, race, sex, birthrate) %>%
     tidyr::drop_na()
 
-  # calculate the denominator of the rates, which is the total population counts by race and sex in the current synthetic population
+  # calculate the denominator of the rates, which is the total population counts by race and sex in the current
+  # synthetic population
   age_breaks <- c(0, 18, 24, 29, 34, 39, 44, 49, 54, 59, 64, 69, 74, 79)
   age_groups <- c("18", "19-24", "25-29", "30-34", "35-39", "40-44", "45-49",
                   "50-54", "55-59", "60-64", "65-69", "70-74", "75-79")
@@ -59,32 +63,6 @@ add_new_18yo <- function(data, migration_rates, cyear, svy_data) {
       cat = paste(sex, agecat, race, sep = "_")
     )
 
-  # identify population categories required for entry that are missing from the survey-based donor population pool
-  # brfsscats <- unique(pool$cat)
-  # missing <- setdiff(cats, brfsscats)
-
-  # if (length(missing) > 0) {
-  #   # summarise missing population categories
-  #   summarymissing <- data.frame(
-  #     YEAR = cyear,
-  #     ncatsmissing = length(missing),
-  #     whichcatsmissing = paste(missing),
-  #     npopmissing = tojoin$toadd,
-  #     npoptotal = sum(tojoin$toadd),
-  #     percentmissing = tojoin$toadd / sum(tojoin$toadd)
-  #   )
-  # } else {
-  #   # no missing population categories
-  #   summarymissing <- data.frame(
-  #     YEAR = cyear,
-  #     ncatsmissing = 0,
-  #     whichcatsmissing = 0,
-  #     npopmissing = 0,
-  #     npoptotal = sum(tojoin$toadd, na.rm = T),
-  #     percentmissing = 0
-  #   )
-  # }
-
   # create a filtered pool of individuals to be sampled for entry into the synthetic population
   filtered_pool <- dplyr::left_join(pool, tojoin, by = c("cat")) %>% dplyr::filter(toadd != 0)
   if(nrow(filtered_pool) == 0) {
@@ -94,7 +72,8 @@ add_new_18yo <- function(data, migration_rates, cyear, svy_data) {
     return(data)
   }
 
-  # sample the required number of new individuals for each population category and prepare them for entry into the synthetic population
+  # sample the required number of new individuals for each population category and prepare them for entry into the
+  # synthetic population
   toadd <- filtered_pool %>% dplyr::group_by(cat) %>%
     dplyr::do(dplyr::sample_n(., size = unique(toadd), replace = TRUE)) %>%
     dplyr::mutate(spawn_year = cyear) %>% dplyr::ungroup()

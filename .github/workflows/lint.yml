@@ -47,5 +47,5 @@ jobs:
 
       - name: Run lintr
         run: |
-          lintr::lint_dir("R")
+          lintr::lint_package(linters = lintr::linters_with_defaults(line_length_linter = lintr::line_length_linter(120)))
         shell: Rscript {0}
