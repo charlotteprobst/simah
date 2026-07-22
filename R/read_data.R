@@ -24,37 +24,53 @@
 #'      and \code{migrationoutrate}
 #' hed_model_list a list with machine learning models used to annually update heavy episodic drinking (HED) status
 #' @export
-read_data <- function() {
+read_data <- function(config_path = NULL) {
 
-  # Find the project root directory
-  project_root <- rprojroot::find_package_root_file()
+  # 1. Locate the config file: allow user override, default to package internal
+  if (is.null(config_path)) {
+    config_path <- system.file("config", "default.yaml", package = "simah")
+  }
 
-  # Load config file
-  config_file <- file.path(project_root, "config/default.yaml")
-  input_config <- yaml::read_yaml(config_file)
+  if (config_path == "" || !file.exists(config_path)) {
+    stop("Configuration file not found.")
+  }
 
-  # Folder with data
-  DataDirectoryMinimal <- input_config[["data_dir"]]
+  input_config <- yaml::read_yaml(config_path)
 
-  # Base data
-  basedata <- input_config[["basedata"]]
-  basepop <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, basedata[["data"]]))})
-  svy_data <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, basedata[["svy_data"]]))}) # formerly brfss
-  mort_data <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, basedata[["mort_data"]]))}) # formerly death_counts; already processed
-  base_rates <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, basedata[["base_rates"]]))})
-  risk_param <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, basedata[["risk_param"]]))})
-  education_transitions <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, basedata[["education_transitions"]]))})
-  education_transitions_covid <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, basedata[["education_transitions_covid"]]))})
-  alcohol_transitions <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, basedata[["alcohol_transitions"]]))})
-  catcontmodel <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, basedata[["catcontmodel"]]))})
-  migration_rates <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, basedata[["migration_rates"]]))})
+  # 2. Define a helper to resolve paths
+  get_data_path <- function(filename) {
+    custom_dir <- input_config[["data_dir"]]
+
+    # If custom_dir is set and file exists, use it
+    if (!is.null(custom_dir) && nchar(custom_dir) > 0 && file.exists(file.path(custom_dir, filename))) {
+      return(file.path(custom_dir, filename))
+    }
+
+    # Fallback to internal package data
+    return(system.file("extdata", filename, package = "simah"))
+  }
+
+
+  # 3. Load the data using the helper
+  basedata_config <- input_config[["basedata"]]
+
+  basepop <- readr::read_rds(get_data_path(basedata_config[["data"]]))
+  svy_data <- readr::read_rds(get_data_path(basedata_config[["svy_data"]]))
+  mort_data <- readr::read_rds(get_data_path(basedata_config[["mort_data"]]))
+  base_rates <- readr::read_rds(get_data_path(basedata_config[["base_rates"]]))
+  risk_param <- readr::read_rds(get_data_path(basedata_config[["risk_param"]]))
+  education_transitions <- readr::read_rds(get_data_path(basedata_config[["education_transitions"]]))
+  education_transitions_covid <- readr::read_rds(get_data_path(basedata_config[["education_transitions_covid"]]))
+  alcohol_transitions <- readr::read_rds(get_data_path(basedata_config[["alcohol_transitions"]]))
+  catcontmodel <- readr::read_rds(get_data_path(basedata_config[["catcontmodel"]]))
+  migration_rates <- readr::read_rds(get_data_path(basedata_config[["migration_rates"]]))
 
   # HED data
   heddata <- input_config[["hevdata"]]
   hed_model_list <- list(
-    'youngmen' = withr::with_dir(project_root, {xgboost::xgb.load(file.path(DataDirectoryMinimal, heddata[["youngmen"]]))}),
-    'else'     = withr::with_dir(project_root, {xgboost::xgb.load(file.path(DataDirectoryMinimal, heddata[["else"]]))}),
-    'oldmen'   = withr::with_dir(project_root, {xgboost::xgb.load(file.path(DataDirectoryMinimal, heddata[["oldmen"]]))})
+    'youngmen' = xgboost::xgb.load(get_data_path(heddata[["youngmen"]])),
+    'else'     = xgboost::xgb.load(get_data_path(heddata[["else"]])),
+    'oldmen'   = xgboost::xgb.load(get_data_path(heddata[["oldmen"]]))
   )
 
   outlist <- list(data = basepop, svy_data = svy_data, mort_data = mort_data, base_rates = base_rates, risk_param = risk_param,

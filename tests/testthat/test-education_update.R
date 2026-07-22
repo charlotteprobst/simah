@@ -1,21 +1,10 @@
 # Load testthat library
 library(testthat)
 
-# 1. Load the package and data (similar to minimal_test_setup.R)
-# We assume the working directory is the project root
-PackageDirectory <- "."
-devtools::load_all(PackageDirectory)
-
-# Define data paths
-DataDirectoryMinimal <- "inputs_data"
-
-# Find the project root directory from inside the test folder
-project_root <- rprojroot::find_package_root_file()
-
 # Load necessary mock data
-basepop <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "data.rds"))})
-education_transitions <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "education_transitions.rds"))})
-education_transitions_covid <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "education_transitions_covid.rds"))})
+basepop <- readr::read_rds(system.file("extdata", "data.rds", package = "simah"))
+education_transitions <- readr::read_rds(system.file("extdata", "education_transitions.rds", package = "simah"))
+education_transitions_covid <- readr::read_rds(system.file("extdata", "education_transitions_covid.rds", package = "simah"))
 
 # 2. Define the test case
 test_that("education_update test non-COVID for year 2020 ", {

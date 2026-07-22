@@ -4,11 +4,6 @@ library(testthat)
 # Set verbosity to suppress warnings during tests
 options(microsim_verbosity = 0)
 
-# 1. Load the package and data (similar to minimal_test_setup.R)
-# We assume the working directory is the project root
-PackageDirectory <- "."
-devtools::load_all(PackageDirectory)
-
 # 2. Define the test case
 test_that("summary_disease ", {
 

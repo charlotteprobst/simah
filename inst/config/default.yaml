@@ -1,5 +1,5 @@
 
-data_dir: 'inputs_data'
+data_dir: 'extdata'
 
 basedata:
   data: 'data.rds'

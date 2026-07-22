@@ -1,11 +1,6 @@
 # Load testthat library
 library(testthat)
 
-# 1. Load the package
-# We assume the working directory is the project root
-PackageDirectory <- "."
-devtools::load_all(PackageDirectory)
-
 test_that("stochastic_universal_sampling correct structure", {
 
   fitness <- c(10, 20, 30, 5, 70, 15, 43, 3)

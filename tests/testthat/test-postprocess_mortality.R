@@ -3,19 +3,8 @@ library(testthat)
 
 options(microsim_verbosity = 0)
 
-# 1. Load the package
-# We assume the working directory is the project root
-PackageDirectory <- "."
-devtools::load_all(PackageDirectory)
-
-# Define data paths
-DataDirectoryMinimal <- "inputs_data"
-
-# Find the project root directory from inside the test folder
-project_root <- rprojroot::find_package_root_file()
-
 # Load necessary mock data
-mort_data <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "mort_data.rds"))})
+mort_data <- readr::read_rds(system.file("extdata", "mort_data.rds", package = "simah"))
 
 test_that("postprocess_mortality works without mort_data", {
 

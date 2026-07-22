@@ -3,21 +3,10 @@ library(testthat)
 
 options(microsim_verbosity = 0)
 
-# 1. Load the package
-# We assume the working directory is the project root
-PackageDirectory <- "."
-devtools::load_all(PackageDirectory)
-
-# Define data paths
-DataDirectoryMinimal <- "inputs_data"
-
-# Find the project root directory from inside the test folder
-project_root <- rprojroot::find_package_root_file()
-
 # Load necessary mock data
-basepop <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "data.rds"))})
-migration_rates <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "migration_rates.rds"))})
-svy_data <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "svy_data.rds"))})
+basepop <- readr::read_rds(system.file("extdata", "data.rds", package = "simah"))
+migration_rates <- readr::read_rds(system.file("extdata", "migration_rates.rds", package = "simah"))
+svy_data <- readr::read_rds(system.file("extdata", "svy_data.rds", package = "simah"))
 
 test_that("add_new_18yo returns correct structure", {
 

@@ -4,11 +4,6 @@ library(testthat)
 # Set verbosity to suppress warnings during tests
 options(microsim_verbosity = 0)
 
-# 1. Load the package and data (similar to minimal_test_setup.R)
-# We assume the working directory is the project root
-PackageDirectory <- "."
-devtools::load_all(PackageDirectory)
-
 test_that("simulate_mortality adds expected columns", {
   # Create minimal test data with required columns
   test_data <- data.frame(

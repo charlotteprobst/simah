@@ -3,11 +3,6 @@ library(testthat)
 
 options(microsim_verbosity = 0)
 
-# 1. Load the package
-# We assume the working directory is the project root
-PackageDirectory <- "."
-devtools::load_all(PackageDirectory)
-
 test_that("read_data returns complete data structure", {
   data_list <- read_data()
 

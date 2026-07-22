@@ -4,20 +4,9 @@ library(testthat)
 # Set verbosity to suppress warnings during tests
 options(microsim_verbosity = 0)
 
-# 1. Load the package and data (similar to minimal_test_setup.R)
-# We assume the working directory is the project root
-PackageDirectory <- "."
-devtools::load_all(PackageDirectory)
-
-# Define data paths
-DataDirectoryMinimal <- "inputs_data"
-
-# Find the project root directory from inside the test folder
-project_root <- rprojroot::find_package_root_file()
-
 # Load necessary mock data
-basepop <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "data.rds"))})
-mort_data <- withr::with_dir(project_root, {readr::read_rds(file.path(DataDirectoryMinimal, "mort_data.rds"))})
+basepop <- readr::read_rds(system.file("extdata", "data.rds", package = "simah"))
+mort_data <- readr::read_rds(system.file("extdata", "mort_data.rds", package = "simah"))
 
 # 2. Define the test case
 test_that("apply_death_counts removes individuals and returns correct structure", {
