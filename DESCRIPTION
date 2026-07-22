@@ -26,7 +26,8 @@ Imports:
     sampling,
     tidyselect,
     truncnorm,
-    utils
+    utils,
+    yaml
 Suggests:
     testthat (>= 3.0.0)
 Encoding: UTF-8
