@@ -53,6 +53,7 @@ microsimulation <- function(maxyear = 2002,
                               alcoholcat  = c("sex", "agecat", "education", "race"),
                               alcoholcont = c("sex", "agecat", "education", "race"),
                               demographics = c("sex", "agecat", "education", "race"),
+                              hed =  c("sex", "agecat", "education", "race"),
                               mortality = c("sex", "agecat", "education", "race")
                             ),
                             seed = 1, nunc = 1, microsim_verbosity = 0,
