@@ -1,10 +1,10 @@
 #' @title Main microsimulation function
-#' @description This function implements and schedules the core simulation processes that advance the synthetic population according to
-#' population dynamics, life course transitions, and potential policy changes. The simulation progresses in annual steps. For each
-#' simulation year from 2000 to \code{maxyear}, the same sequence is executed and outputs are summarized according to \code{output}
-#' and population \code{strata}. Essential input data (e.g., synthetic baseline population in 2000) and model parameters
-#' (e.g., mortality statistics, education and alcohol transitions, and parameters linking alcohol consumption to specific causes of death)
-#' must be supplied.
+#' @description This function implements and schedules the core simulation processes that advance the synthetic
+#' population according to population dynamics, life course transitions, and potential policy changes. The simulation
+#' progresses in annual steps. For each simulation year from 2000 to \code{maxyear}, the same sequence is executed and
+#' outputs are summarized according to \code{output} and population \code{strata}. Essential input data (e.g.,
+#' synthetic baseline population in 2000) and model parameters (e.g., mortality statistics, education and alcohol
+#' transitions, and parameters linking alcohol consumption to specific causes of death) must be supplied.
 #' @param maxyear a numeric value of the maximum simulation year
 #' @param diseases a vector of specific causes of death that are modelled explicitly in relation to alcohol use
 #' @param inflation_factors a vector with inflation factors that are applied to age categories with low
@@ -17,13 +17,16 @@
 #'      minimal risk exposure level of alcohol use; 0 or 1
 #' @param policy a string that indicates the type of policy being modeled; current allowed values are "none" and "basic"
 #' @param year_policy year(s) in which the policy is applied, numeric
-#' @param cons_elasticity a numeric vector containing mean own-price consumption elasticities for beer, wine, and spirits
-#' @param cons_elasticity_se vector containing standard errors corresponding to consumption elasticities for beer, wine, and spirits
+#' @param cons_elasticity a numeric vector containing mean own-price consumption elasticities for beer, wine, and
+#' spirits
+#' @param cons_elasticity_se vector containing standard errors corresponding to consumption elasticities for beer,
+#' wine, and spirits
 #' @param r_sim_obs correlation between baseline consumption and individual response to price change, numeric
-#' @param output a character vector specifying the types of outputs to summarize in each annual cycle of the simulation; options include
+#' @param output a character vector specifying the types of outputs to summarize in each annual cycle of the simulation;
+#' options include
 #'      "demographics", "alcoholcat", "alcoholcont", and "mortality"
-#' @param strata a named list specifying stratification variables for each output type; options include "sex", "agecat", "education",
-#'      and "race"
+#' @param strata a named list specifying stratification variables for each output type; options include "sex", "agecat",
+#' "education" and "race"
 #' @param seed random numeric seed used for stochastic processes in the microsimulation
 #' @param nunc numeric identifier for the unique combination of microsimulation parameters
 #' @param microsim_verbosity integer controlling output level: 0 = silent (only errors),
@@ -40,12 +43,12 @@ microsimulation <- function(maxyear = 2002,
                             COVID_specific_tps = 1,
                             updatingalcohol = TRUE,
                             counterfactual = 0,
-                            policy = "basic",  # allowed values are none and basic
+                            policy = "none",  # allowed values are none and basic
                             year_policy = 1999,
                             cons_elasticity = -0.1078,
                             cons_elasticity_se = 0.0442,
                             r_sim_obs = 0.8,
-                            output = c("demographics", "alcoholcat", "alcoholcont", "hed", "hed_cat", "mortality"), # sbi - policy_sbi_cascade
+                            output = c("demographics", "alcoholcat", "alcoholcont", "hed", "mortality"),
                             strata = list(
                               alcoholcat  = c("sex", "agecat", "education", "race"),
                               alcoholcont = c("sex", "agecat", "education", "race"),
@@ -217,31 +220,6 @@ microsimulation <- function(maxyear = 2002,
                          policymodel = as.character(policymodel)
           )
       }
-
-      # --- Summary output for heacy episodic drinking - new categories ---
-      if ("hed_cat" %in% output) {
-        full_strata <- unique(c(base_strata, strata[["hed_cat"]]))
-
-        age_breaks <- c(0, 20, 34, 64, 100)
-        age_groups <- c("18-20", "21-34", "35-64", "65+")
-        Summary[["hed_cat"]][[paste(y)]] <- data %>%
-          dplyr::mutate(year = y, agecat = cut(age, breaks = age_breaks, labels = age_groups),
-                        education = ifelse(agecat == "18-20" & education == "College", "SomeC", education),
-                        alc_cat = dplyr::case_when(
-                          alc_gpd < 1 ~ "Minimal and non-drinker",
-                          alc_gpd >= 1 & alc_gpd < 60 ~ "Occasional and regular drinker",
-                          alc_gpd >= 60 ~ "Heavy drinker",
-                          TRUE ~ NA_character_
-                        )) %>%
-          dplyr::group_by(dplyr::across(dplyr::all_of(full_strata)), .drop = FALSE) %>%
-          dplyr::summarise(n = dplyr::n(),
-                           n_hed = sum(hed_binary),
-                           hed_prop = mean(hed_binary, na.rm = TRUE),
-                           seed = seed,
-                           nunc = nunc,
-                           policymodel = as.character(policymodel)
-          )
-      }
     }
 
     # store summary of the synthetic population
@@ -411,10 +389,6 @@ microsimulation <- function(maxyear = 2002,
   # --- store hed output in summary ---
   if ("hed" %in% output) {
     Summary$hed <- do.call(rbind, Summary[["hed"]])
-  }
-
-  if ("hed_cat" %in% output) {
-    Summary$hed_cat <- do.call(rbind, Summary[["hed_cat"]])
   }
 
   # --- return final combined summary ---

@@ -7,7 +7,7 @@ options(microsim_verbosity = 0)
 diseases <- c("AUD", "DM", "HLVDC", "HYPHD", "IHD", "IJ", "ISTR", "LVDC", "MVACC", "UIJ")
 inflation_factors <- c(28, 3)
 age_inflated <- list(c("18-24","25-34","35-44","45-54","55-64"), c("65-74", "75-79"))
-output <- c("demographics", "alcoholcat", "alcoholcont", "hed", "hed_cat", "mortality")
+output <- c("demographics", "alcoholcat", "alcoholcont", "hed", "mortality")
 strata <- list(
   alcoholcat  = c("sex", "agecat", "education", "race"),
   alcoholcont = c("sex", "agecat", "education", "race"),
@@ -23,7 +23,7 @@ test_that("microsimulation runs with default parameters", {
   expect_type(result, "list")
 
   # Check that all requested output types are present
-  expected_outputs <- c("demographics", "alcoholcat", "alcoholcont", "hed", "hed_cat", "mortality")
+  expected_outputs <- c("demographics", "alcoholcat", "alcoholcont", "hed", "mortality")
   expect_true(all(expected_outputs %in% names(result)))
 })
 
@@ -47,7 +47,7 @@ test_that("microsimulation runs without errors", {
   expect_type(result, "list")
 
   # Check that all requested output types are present
-  expected_outputs <- c("demographics", "alcoholcat", "alcoholcont", "hed", "hed_cat", "mortality")
+  expected_outputs <- c("demographics", "alcoholcat", "alcoholcont", "hed", "mortality")
   expect_true(all(expected_outputs %in% names(result)))
 })
 
@@ -123,7 +123,7 @@ test_that("microsimulation with policy tax", {
   expect_type(result, "list")
 
   # Check that all requested output types are present
-  expected_outputs <- c("demographics", "alcoholcat", "alcoholcont", "hed", "hed_cat", "mortality")
+  expected_outputs <- c("demographics", "alcoholcat", "alcoholcont", "hed", "mortality")
   expect_true(all(expected_outputs %in% names(result)))
 })
 
@@ -181,6 +181,6 @@ test_that("microsimulation pass data as input", {
   result <- microsimulation(datalist = datalist)
 
   # Check that all requested output types are present
-  expected_outputs <- c("demographics", "alcoholcat", "alcoholcont", "hed", "hed_cat", "mortality")
+  expected_outputs <- c("demographics", "alcoholcat", "alcoholcont", "hed", "mortality")
   expect_true(all(expected_outputs %in% names(result)))
 })
