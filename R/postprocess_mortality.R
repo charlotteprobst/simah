@@ -3,6 +3,7 @@
 #' life lost (YLL)) for each simulated year with observed death counts, harmonizing age, sex, race, and education
 #' subgroup stratification.
 #' @param DiseaseSummary list of data frames that contain cause-specific mortality outputs by subgroup for each simulated year
+#' @param full_strata vector of individual characteristics to be used for grouping data
 #' @param mort_data option to include observed cause- and subgroup-specific death counts from external empirical data
 #' @return a long-format data frame suitable for comparison of simulated and observed mortality outcomes by cause
 #' @keywords microsimulation, mortality, output
