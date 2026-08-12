@@ -109,10 +109,10 @@ devtools::check()
 ## Contributors
 
 - Charlotte Probst (principal): [charlotte.probst@camh.ca](mailto:charlotte.probst@camh.ca) | [ORCID](https://orcid.org/0000-0003-4360-697X)
-- Julia Lemp: [julia.lemp@uni-heidelberg.de](mailto:julia.lemp@uni-heidelberg.de) | [ORCID](https://orcid.org/0000-0002-1524-3641)
 - Xinyi Kou: [x.kou@sheffield.ac.uk](mailto:x.kou@sheffield.ac.uk) | [ORCID](https://orcid.org/0000-0002-3635-6178)
 - Charlotte Buckley: [charlotte.buckley@liverpool.ac.uk](mailto:charlotte.buckley@liverpool.ac.uk) | [ORCID](https://orcid.org/0000-0002-8430-0347)
 - João A. Duro: [j.a.duro@sheffield.ac.uk](mailto:j.a.duro@sheffield.ac.uk) | [ORCID](https://orcid.org/0000-0002-7684-4707)
+- Julia Lemp: [julia.lemp@uni-heidelberg.de](mailto:julia.lemp@uni-heidelberg.de) | [ORCID](https://orcid.org/0000-0002-1524-3641)
 - Robin Purshouse: [r.purshouse.sheffield.ac.uk](mailto:r.purshouse.sheffield.ac.uk) | [ORCID](https://orcid.org/0000-0001-5880-1925)
 
 ## License
