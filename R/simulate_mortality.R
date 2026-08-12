@@ -66,11 +66,23 @@ simulate_mortality <- function(data, diseases) {
 
     if(max_risk > 1) {
       if(any(data[[risk_expr]] > 1, na.rm = TRUE)) {
-        warn_msg <- paste(risk_expr, "exceeds 1!")
+        warn_msg <- paste0(risk_expr, " exceeds 1!")
         log_verbosity(warn_msg, level = 1, type = "warn")
       }
     }
   }
+
+  # If max_risk > 1 for any individual, scale all risks proportionally
+  if (any(max_risk > 1, na.rm = TRUE)) {
+    warn_msg <- paste0("All risk columns are going to be normalised by ", max_risk)
+    log_verbosity(warn_msg, level = 1, type = "warn")
+    for (disease in diseases) {
+      risk_col <- paste0("risk_", rlang::quo_name(disease))
+      data[[risk_col]] <- data[[risk_col]] / max_risk
+    }
+  }
+
+
   # sample a random value from a uniform distribution
   # note: this process ensures that individuals are allocated to different causes of death proportionally to their risk
   data$prob <- stats::runif(nrow(data))

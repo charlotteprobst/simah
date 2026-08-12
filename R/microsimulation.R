@@ -1,97 +1,124 @@
 #' @title Main microsimulation function
-#' @description This function implements and schedules the core simulation processes that advance the synthetic population according to
-#' population dynamics, life course transitions, and potential policy changes. The simulation progresses in annual steps. For each
-#' simulation year from 2000 to \code{maxyear}, the same sequence is executed and outputs are summarized according to \code{output}
-#' and population \code{strata}. Essential input data (e.g., synthetic baseline population in 2000) and model parameters
-#' (e.g., mortality statistics, education and alcohol transitions, and parameters linking alcohol consumption to specific causes of death)
-#' must be supplied.
-#' @param data a data frame containing the synthetic baseline population, with at least columns \code{ID}, \code{age}, \code{sex}, \code{race},
-#'      \code{education}, \code{education_detailed}, \code{drinkingstatus}, \code{alc_cat}, \code{alc_gpd}, \code{formerdrinker}
-#' @param svy_data a survey data frame to supply 18-year-olds and migrants joining the synthetic population over time, with at least
-#'      columns \code{YEAR}, \code{age}, \code{sex}, \code{race}, \code{education}, \code{education_detailed}, \code{drinkingstatus},
-#'      \code{alc_cat}, \code{alc_gpd}, \code{formerdrinker}
+#' @description This function implements and schedules the core simulation processes that advance the synthetic
+#' population according to population dynamics, life course transitions, and potential policy changes. The simulation
+#' progresses in annual steps. For each simulation year from 2000 to \code{maxyear}, the same sequence is executed and
+#' outputs are summarized according to \code{output} and population \code{strata}. Essential input data (e.g.,
+#' synthetic baseline population in 2000) and model parameters (e.g., mortality statistics, education and alcohol
+#' transitions, and parameters linking alcohol consumption to specific causes of death) must be supplied.
 #' @param maxyear a numeric value of the maximum simulation year
-#' @param mort_data a data frame containing the cause-specific death counts by population subgroup and year, with at least columns \code{year},
-#'      \code{cat} as well as \code{CAUSEmort} variables
-#' @param base_rates a data frame containing the cause-specific mortality base rates by population subgroup and year, representing mortality
-#'      rates at the theoretical minimal risk exposure level, with at least \code{year}, \code{cat} as well as \code{rate_CAUSE} variables
 #' @param diseases a vector of specific causes of death that are modelled explicitly in relation to alcohol use
-#' @param risk_param a data frame containing the risk function parameters for all causes of death specified in \code{diseases}
 #' @param inflation_factors a vector with inflation factors that are applied to age categories with low
 #'      observed mortality rates (specified in \code{age_inflated}) to stabilize simulated mortality
 #' @param age_inflated a list with age categories to be inflated using \code{inflation_factors}
-#' @param education_transitions a data frame of non-COVID cumulative transition probabilities for each population category and
-#'      destination education state, with at least \code{cat}, \code{StateTo} and \code{cumsum}
-#' @param education_transitions_covid a data frame of COVID cumulative transition probabilities for each population category and
-#'      destination education state, with at least \code{cat}, \code{StateTo} and \code{cumsum}
 #' @param COVID_specific_tps indicator specifying which COVID scenario to model; 0 (= non-COVID),
 #'      1 (non-COVID before 2020 and after 2022 / COVID in 2020-2022), or 2 (= non-COVID before 2020 / COVID after 2020)
 #' @param updatingalcohol indicator for whether to update alcohol use; FALSE or TRUE
-#' @param alcohol_transitions a data frame containing the coefficients of the ordinal regression model to inform transitions between
-#'      alcohol use categories
-#' @param catcontmodel a data frame containing the parameters of the beta distributions of grams per day by alcohol use category and
-#'      population subgroup
-#' @param hed_model_list a list with machine learning models used to annually update heavy episodic drinking (HED) status
 #' @param counterfactual indicator for whether to model a counterfactual scenario where everyone is at the theoretical
 #'      minimal risk exposure level of alcohol use; 0 or 1
-#' @param migration_rates a data frame containing age-18 entry and migration rates by race, sex and year,
-#'      with at least columns \code{agecat}, \code{race}, \code{sex}, \code{year}, \code{birthrate}, \code{migrationinrate},
-#'      and \code{migrationoutrate}
-#' @param output a character vector specifying the types of outputs to summarize in each annual cycle of the simulation; options include
+#' @param policy a string that indicates the type of policy being modeled; current allowed values are "none" and "basic"
+#' @param year_policy year(s) in which the policy is applied, numeric
+#' @param cons_elasticity a numeric vector containing mean own-price consumption elasticities for beer, wine, and
+#' spirits
+#' @param cons_elasticity_se vector containing standard errors corresponding to consumption elasticities for beer,
+#' wine, and spirits
+#' @param r_sim_obs correlation between baseline consumption and individual response to price change, numeric
+#' @param output a character vector specifying the types of outputs to summarize in each annual cycle of the simulation;
+#' options include
 #'      "demographics", "alcoholcat", "alcoholcont", and "mortality"
-#' @param strata a named list specifying stratification variables for each output type; options include "sex", "agecat", "education",
-#'      and "race"
+#' @param strata a named list specifying stratification variables for each output type; options include "sex", "agecat",
+#' "education" and "race"
 #' @param seed random numeric seed used for stochastic processes in the microsimulation
 #' @param nunc numeric identifier for the unique combination of microsimulation parameters
 #' @param microsim_verbosity integer controlling output level: 0 = silent (only errors),
 #'      1 = default (progress info), 2+ = full verbose (detailed logs)
+#' @param datalist a list of dataframes with data that can be provided manually, and is required for this package.
+#' This input is set to NULL by default, which means that the data will be loaded instead by the read_data function.
 #' @return a list containing outputs specified in \code{output}, summarized by \code{strata}, for each simulated year
 #' @keywords microsimulation, main function
 #' @export
-microsimulation <- function(data, svy_data, maxyear = 2030,
-                            mort_data, base_rates,
+microsimulation <- function(maxyear = 2002,
                             diseases = c("AUD", "DM", "HLVDC", "HYPHD", "IHD", "IJ", "ISTR", "LVDC", "MVACC", "UIJ"),
-                            risk_param,
                             inflation_factors = c(28, 3),
                             age_inflated = list(c("18-24","25-34","35-44","45-54","55-64"), c("65-74", "75-79")),
-                            education_transitions,
-                            education_transitions_covid,
                             COVID_specific_tps = 1,
                             updatingalcohol = TRUE,
-                            alcohol_transitions,
-                            catcontmodel,
-                            hed_model_list,
                             counterfactual = 0,
-                            migration_rates,
-                            output = c("demographics", "alcoholcat", "alcoholcont", "mortality"), # sbi - policy_sbi_cascade
+                            policy = "none",  # allowed values are none and basic
+                            year_policy = 1999,
+                            cons_elasticity = -0.1078,
+                            cons_elasticity_se = 0.0442,
+                            r_sim_obs = 0.8,
+                            output = c("alcoholcat", "alcoholcont", "demographics", "hed", "mortality"),
                             strata = list(
                               alcoholcat  = c("sex", "agecat", "education", "race"),
                               alcoholcont = c("sex", "agecat", "education", "race"),
                               demographics = c("sex", "agecat", "education", "race"),
+                              hed =  c("sex", "agecat", "education", "race"),
                               mortality = c("sex", "agecat", "education", "race")
                             ),
-                            seed = 1, nunc = 1, microsim_verbosity = 1
+                            seed = 1, nunc = 1, microsim_verbosity = 0,
+                            datalist = NULL
                             ){
   set.seed(seed)
 
   options(microsim_verbosity = microsim_verbosity)
 
+  # READ DATA
+  if (is.null(datalist)) {
+    data_list <- read_data()
+  } else {
+    data_list <- datalist
+  }
+  data <- data_list[["data"]]
+  svy_data <- data_list[["svy_data"]]
+  mort_data <- data_list[["mort_data"]]
+  base_rates <- data_list[["base_rates"]]
+  risk_param <- data_list[["risk_param"]]
+  education_transitions <- data_list[["education_transitions"]]
+  education_transitions_covid <- data_list[["education_transitions_covid"]]
+  alcohol_transitions <- data_list[["alcohol_transitions"]]
+  catcontmodel <- data_list[["catcontmodel"]]
+  migration_rates <- data_list[["migration_rates"]]
+  hed_model_list <- data_list[["hed_model_list"]]
+
   # set start year of microsimulation
   minyear <- 2000
+
+  ## POLICY CHECKS ##
+
+  # Check if the chosen policy is one of the available ones
+  apply_policy <- ifelse(policy != "none", TRUE, FALSE)
+  policymodel <- switch(policy,
+                        "basic"  = 1,
+                        "none" = 0,
+                        stop(sprintf("Error: '%s' is not a valid policy type!", policy))
+  )
+
+  if (apply_policy & ( min(year_policy) > maxyear | min(year_policy) < minyear ) ) {
+    log_verbosity("Policy is not within model time frame", level = 1, type = "warn")
+  }
+
+  policy_intervention <- ifelse(apply_policy, "intervention", "no intervention")
+  log_verbosity(paste0("Alcohol policy with ", policy_intervention), level = 1, type = "info")
+
+  if(apply_policy) {
+    log_verbosity(paste0("Alcohol policy intervention type is ", policy), level = 1, type = "info")
+  }
+
+  ## SIMULATION START ##
 
   # prepare data objects
   Summary <- list()
   DiseaseSummary <- list()
   PopPerYear <- list()
   RestSummary <- list()
-  # PLACEHOLDER: Insert some warnings/plausibility checks, e.g., are data objects provided if needed (COVID TPs etc.)
 
 # ===== simulation loop in annual steps [y] from 2000 ====
 
   for (y in minyear:maxyear) {
     log_verbosity(paste("Simulating year", y), level = 1, type = "info")
 
-    if (counterfactual==0 & y >= minyear){
+    if (counterfactual == 0 & y >= minyear){
       # update HED
       data <- update_hed(data, hed_model_list[[1]], hed_model_list[[2]], hed_model_list[[3]])
     }
@@ -106,17 +133,18 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
       data$hed_binary <- FALSE
     }
 
-    if (counterfactual==2 & y >= minyear){
-      # counterfactual: no HED between 0 and 60 g/day
-      data <- data %>%
-          dplyr::mutate(
-            hed_binary = dplyr::case_when(
-              drinkingstatus == FALSE ~ FALSE,
-              drinkingstatus == TRUE & alc_gpd <  60 ~ FALSE,
-              drinkingstatus == TRUE & alc_gpd >= 60 ~ TRUE,
-              TRUE ~ 0
-            )
-          )
+    # to model policy effect on alcohol use
+    if (apply_policy & y %in% year_policy) {
+
+      data <- apply_basic_policy(
+        data,
+        cons_elasticity,
+        cons_elasticity_se,
+        r_sim_obs
+      )
+
+      # update alcohol categories
+      data <- update_alcohol_cat(data)
     }
 
     # create alcohol outputs
@@ -140,7 +168,8 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
             n_hed = sum(hed_binary, na.rm = TRUE),
             hed_prop = mean(hed_binary, na.rm = TRUE),
             seed = seed,
-            nunc = nunc
+            nunc = nunc,
+            policymodel = as.character(policymodel)
           )
       }
 
@@ -169,7 +198,8 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
           dplyr::mutate(
             propsimulation = n / sum(n),
             seed = seed,
-            nunc = nunc
+            nunc = nunc,
+            policymodel = as.character(policymodel)
           ) %>%
           dplyr::ungroup()
       }
@@ -187,38 +217,15 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
                          n_hed = sum(hed_binary),
                          hed_prop = mean(hed_binary, na.rm = TRUE),
                          seed = seed,
-                         nunc = nunc
-          )
-      }
-
-      # --- Summary output for heacy episodic drinking - new categories ---
-      if ("hed_cat" %in% output) {
-        full_strata <- unique(c(base_strata, strata[["hed_cat"]]))
-
-        age_breaks <- c(0, 20, 34, 64, 100)
-        age_groups <- c("18-20", "21-34", "35-64", "65+")
-        Summary[["hed_cat"]][[paste(y)]] <- data %>%
-          dplyr::mutate(year = y, agecat = cut(age, breaks = age_breaks, labels = age_groups),
-                        education = ifelse(agecat == "18-20" & education == "College", "SomeC", education),
-                        alc_cat = dplyr::case_when(
-                          alc_gpd < 1 ~ "Minimal and non-drinker",
-                          alc_gpd >= 1 & alc_gpd < 60 ~ "Occasional and regular drinker",
-                          alc_gpd >= 60 ~ "Heavy drinker",
-                          TRUE ~ NA_character_
-                        )) %>%
-          dplyr::group_by(dplyr::across(dplyr::all_of(full_strata)), .drop = FALSE) %>%
-          dplyr::summarise(n = dplyr::n(),
-                           n_hed = sum(hed_binary),
-                           hed_prop = mean(hed_binary, na.rm = TRUE),
-                           seed = seed,
-                           nunc = nunc
+                         nunc = nunc,
+                         policymodel = as.character(policymodel)
           )
       }
     }
 
     # store summary of the synthetic population
     PopPerYear[[paste(y)]] <- data %>%
-      dplyr::mutate(year = y, seed = seed, nunc = nunc)
+      dplyr::mutate(year = y, seed = seed, nunc = nunc, policymodel = policymodel)
 
     # MORTALITY
     # simulate mortality for causes that are not explicitly modelled ("REST");
@@ -294,7 +301,7 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
     data <- rbind(totransition, tostay)
 
     # update alcohol use categories
-    if (updatingalcohol == TRUE) {
+    if (updatingalcohol) {
       log_verbosity("Processing alcohol transitions", level = 1, type = "info")
       data <- transition_alcohol(data, alcohol_transitions)
       # allocate a new numeric grams per day to individuals that have changed alcohol use categories
@@ -309,12 +316,8 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
       }
     }
 
-    # age everyone by 1 year and update age category
-    age_breaks <- c(0, 19, 24, 34, 44, 54, 64, 74, 100)
-    age_groups <- c("15-19", "20-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75-79")
-    data <- data %>%
-      dplyr::mutate(age = age + 1,
-                    agecat = cut(age, breaks = age_breaks, labels = age_groups))
+    # age everyone by 1 year
+    data <- data %>% dplyr::mutate(age = age + 1)
 
     # remove anyone over 79
     data <- subset(data, age <= 79)
@@ -338,18 +341,20 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
   # --- store mortality output in summary ---
   # if ("mortality" %in% output) {
   if ("mortality" %in% output & !is.null(diseases)) {
-    Summary$mortality <- postprocess_mortality(DiseaseSummary, mort_data = NULL) %>%
-      dplyr::mutate(seed = seed, nunc = nunc)
+    Summary$mortality <- postprocess_mortality(DiseaseSummary,
+                                               full_strata = full_strata,
+                                               mort_data = NULL) %>%
+      dplyr::mutate(seed = seed, nunc = nunc, policymodel = policymodel)
   } else if ("mortality" %in% output & is.null(diseases)) {
     Summary$mortality <- lapply(names(RestSummary), function(y) {
       RestSummary[[paste(y)]] %>% dplyr::mutate(year = y)
     }) %>%
-      do.call(rbind, .) %>% dplyr::mutate(seed = seed, nunc = nunc)
+      do.call(rbind, .) %>% dplyr::mutate(seed = seed, nunc = nunc, policymodel = policymodel)
   }
 
   # --- store demographics output in summary ---
   if ("demographics" %in% output) {
-    base_strata <- c("year", "seed", "nunc")
+    base_strata <- c("year", "seed", "nunc", "policymodel")
     full_strata <- unique(c(base_strata, strata[["demographics"]])) # user-defined strata
 
     age_breaks <- c(0, 18, 24, 29, 34, 39, 44, 49, 54, 59, 64, 69, 74, 100)
@@ -387,10 +392,6 @@ microsimulation <- function(data, svy_data, maxyear = 2030,
   # --- store hed output in summary ---
   if ("hed" %in% output) {
     Summary$hed <- do.call(rbind, Summary[["hed"]])
-  }
-
-  if ("hed_cat" %in% output) {
-    Summary$hed_cat <- do.call(rbind, Summary[["hed_cat"]])
   }
 
   # --- return final combined summary ---

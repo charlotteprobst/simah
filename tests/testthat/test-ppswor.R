@@ -1,14 +1,14 @@
 # Load testthat library
 library(testthat)
 
-test_that("stochastic_universal_sampling correct structure", {
+test_that("ppswor correct structure", {
 
   fitness <- c(10, 20, 30, 5, 70, 15, 43, 3)
   nselect <- 4
-  selectedIDs <- stochastic_universal_sampling(fitness, nselect)
+  selectedIDs <- ppswor(fitness, nselect)
 
   usel <- unique(selectedIDs)
-  expect_true(length(usel) <= nselect)
+  expect_true(length(usel) == nselect)
 
   expect_equal(length(selectedIDs), nselect)
 
@@ -17,18 +17,18 @@ test_that("stochastic_universal_sampling correct structure", {
   expect_true(all(selectedIDs <= length(fitness)))
 })
 
-test_that("stochastic_universal_sampling with nselect = 1 works correctly", {
+test_that("ppswor with nselect = 1 works correctly", {
   fitness <- c(10, 20, 30, 5, 70, 15, 43, 3)
-  selectedIDs <- stochastic_universal_sampling(fitness, 1)
+  selectedIDs <- ppswor(fitness, 1)
 
   expect_equal(length(selectedIDs), 1)
   expect_true(selectedIDs[1] >= 1)
   expect_true(selectedIDs[1] <= length(fitness))
 })
 
-test_that("stochastic_universal_sampling may return duplicates even when nselect = length(fitness)", {
+test_that("ppswor cannot return duplicates even when nselect = length(fitness)", {
   fitness <- c(10, 20, 30, 5, 70, 15, 43, 3)
-  selectedIDs <- stochastic_universal_sampling(fitness, length(fitness))
+  selectedIDs <- ppswor(fitness, length(fitness))
 
   expect_equal(length(selectedIDs), length(fitness))
 
@@ -37,20 +37,20 @@ test_that("stochastic_universal_sampling may return duplicates even when nselect
   expect_true(all(selectedIDs <= length(fitness)))
 })
 
-test_that("stochastic_universal_sampling allows duplicates with equal fitness", {
+test_that("ppswor allows duplicates with equal fitness", {
   fitness <- rep(1, 10)
   nselect <- 5
-  selectedIDs <- stochastic_universal_sampling(fitness, nselect)
+  selectedIDs <- ppswor(fitness, nselect)
 
   expect_equal(length(selectedIDs), nselect)
   expect_true(all(selectedIDs >= 1))
   expect_true(all(selectedIDs <= length(fitness)))
 })
 
-test_that("stochastic_universal_sampling tracks unique vs total selections", {
+test_that("ppswor tracks unique vs total selections", {
   fitness <- c(10, 20, 30, 5, 70, 15, 43, 3)
   nselect <- 4
-  selectedIDs <- stochastic_universal_sampling(fitness, nselect)
+  selectedIDs <- ppswor(fitness, nselect)
 
   expect_equal(length(selectedIDs), nselect)
   expect_true(all(selectedIDs >= 1))
@@ -61,29 +61,29 @@ test_that("stochastic_universal_sampling tracks unique vs total selections", {
   n_total <- length(selectedIDs)
 
   # n_unique may be less than n_total due to possible duplicates
-  expect_true(n_unique <= n_total)
+  expect_true(n_unique == n_total)
 })
 
-test_that("stochastic_universal_sampling handles large populations", {
+test_that("ppswor handles large populations", {
   fitness <- rep(1, 1000)
   nselect <- 100
-  selectedIDs <- stochastic_universal_sampling(fitness, nselect)
+  selectedIDs <- ppswor(fitness, nselect)
 
   expect_equal(length(selectedIDs), nselect)
   expect_true(all(selectedIDs >= 1))
   expect_true(all(selectedIDs <= 1000))
 })
 
-test_that("stochastic_universal_sampling demonstrates SUS property of even spacing with possible duplicates", {
+test_that("ppswor demonstrates SUS property of even spacing with possible duplicates", {
   # With high nselect and low diversity in fitness, duplicates become more likely
   fitness <- c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
   nselect <- 8
-  selectedIDs <- stochastic_universal_sampling(fitness, nselect)
+  selectedIDs <- ppswor(fitness, nselect)
 
   # SUS should spread selections evenly, but duplicates can occur
   expect_equal(length(selectedIDs), nselect)
 
   # Check that selection is roughly evenly distributed
   unique_selected <- unique(selectedIDs)
-  expect_true(length(unique_selected) <= nselect)
+  expect_true(length(unique_selected) == nselect)
 })

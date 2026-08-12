@@ -4,10 +4,23 @@ library(testthat)
 # Set verbosity to suppress warnings during tests
 options(microsim_verbosity = 0)
 
-# 1. Load the package and data (similar to minimal_test_setup.R)
-# We assume the working directory is the project root
-PackageDirectory <- "."
-devtools::load_all(PackageDirectory)
+test_that("simulate_mortality warns when cumulative risk from multiple diseases exceeds 1", {
+  n <- 10  # number of individuals
+  test_data <- data.frame(
+    drinkingstatus = rep(TRUE, n),
+    formerdrinker = rep(FALSE, n),
+    age = rep(50, n),
+    RR_liver = rep(1.2, n),   # liver risk = 1.2 * 0.5 = 0.6
+    rate_liver = rep(0.5, n),
+    RR_dm = rep(1.0, n),      # dm risk = 1.0 * 0.5 = 0.5, cumulative = 0.5 + 0.6 = 1.1 > 1
+    rate_dm = rep(0.5, n)
+  )
+
+  options(microsim_verbosity = 1)
+  expect_output(
+    simulate_mortality(test_data, diseases = c("liver", "dm")), "exceeds 1"
+  )
+})
 
 test_that("simulate_mortality adds expected columns", {
   # Create minimal test data with required columns
