@@ -1,11 +1,6 @@
 # Load testthat library
 library(testthat)
 
-# 1. Load the package and data (similar to minimal_test_setup.R)
-# We assume the working directory is the project root
-PackageDirectory <- "."
-devtools::load_all(PackageDirectory)
-
 # 2. Define the test case
 description <- "log_verbosity returns formatted message when requested"
 test_that(description, {

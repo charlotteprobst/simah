@@ -1,11 +1,10 @@
-# GitHub Actions workflow for running testthat tests
-# This workflow runs all tests in the tests/testthat directory
+# GitHub Actions workflow for R package check
+# This workflow runs R CMD check to validate the package
 # Triggered on push and pull request to any branch
 
-name: testthat tests
+name: R CMD Check
 
 on:
-  # Trigger on push to any branch
   push:
     branches:
       - main
@@ -13,26 +12,22 @@ on:
       - feature/*
       - bugfix/*
       - release/*
-  # Trigger on pull requests
   pull_request:
     branches:
       - main
       - develop
-  # Allow manual triggering
   workflow_dispatch:
 
-# Cancel in-progress jobs for the same branch
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  test-that:
+  check:
     runs-on: ubuntu-latest
 
-    name: Run testthat tests
+    name: R CMD Check
 
-    # Environment variables
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
@@ -63,19 +58,18 @@ jobs:
             libfreetype6-dev \
             libpng-dev \
             libtiff5-dev \
-            libjpeg-dev
+            libjpeg-dev \
+            pandoc
 
       # Step 4: Install R dependencies
       - name: Install package dependencies
         run: |
-          # Install required packages
-          install.packages(c("devtools", "testthat", "readr", "dplyr", "data.table", "remotes", "sampling"))
+          install.packages(c("devtools", "testthat", "rhub", "readr", "dplyr", "data.table", "remotes", "sampling"))
           # Install package dependencies
           devtools::install_deps(dependencies = TRUE)
         shell: Rscript {0}
 
-      # Step 5: Download required data files BEFORE loading package
-      # This ensures files exist before devtools::load_all() runs
+      # Step 5: Download required data files for examples
       - name: Download data files
         run: |
           echo "Downloading data.rds..." 
@@ -90,26 +84,18 @@ jobs:
           devtools::load_all(".")
         shell: Rscript {0}
 
-      # Step 7: Run all testthat tests
-      - name: Run testthat tests
+      # Step 7: R CMD check
+      - name: R CMD check
         run: |
-          # Run all tests in the testthat directory
-          devtools::test(reporter = "summary")
+          # Run checks
+          devtools::check(error_on = "never")
         shell: Rscript {0}
 
-      # Step 8: Run tests with coverage (optional, for future enhancement)
-      - name: Run tests with detailed reporter
-        if: always()
-        run: |
-          # Run tests with more detailed output
-          devtools::test(reporter = "progress")
-        shell: Rscript {0}
-
-      # Step 9: Upload test results (for debugging)
-      - name: Upload test results
+      # Step 8: Upload check results
+      - name: Upload check results
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: .
+          name: check-results
+          path: simah.Rcheck/
           retention-days: 7

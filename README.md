@@ -68,6 +68,19 @@ results <- microsimulation()
 summary(results)
 ```
 
+### Microsimulation Model DataSet
+The microsimulation model datasets are located in the inputs_data folder. By default, these datasets are loaded by the read_data() function and returned as a  list of datasets. The following shows how to access the datasets:    
+```r
+# Load the package
+library(simah)
+
+# read a list with all dataframes used by the package
+datasets <- read_data()
+
+# access a data frame containing the synthetic baseline population
+data <- datasets[["data"]]
+```
+
 ### Running tests
 ```r
 # Run all tests

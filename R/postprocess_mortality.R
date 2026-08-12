@@ -3,11 +3,12 @@
 #' life lost (YLL)) for each simulated year with observed death counts, harmonizing age, sex, race, and education
 #' subgroup stratification.
 #' @param DiseaseSummary list of data frames that contain cause-specific mortality outputs by subgroup for each simulated year
+#' @param full_strata vector of individual characteristics to be used for grouping data
 #' @param mort_data option to include observed cause- and subgroup-specific death counts from external empirical data
 #' @return a long-format data frame suitable for comparison of simulated and observed mortality outcomes by cause
 #' @keywords microsimulation, mortality, output
 #' @export
-postprocess_mortality <- function(DiseaseSummary, mort_data = NULL) {
+postprocess_mortality <- function(DiseaseSummary, full_strata = c("sex", "agecat", "education", "race"), mort_data = NULL) {
   # combine simulated mortality output for all simulated years
   Diseases <- do.call(rbind, DiseaseSummary)
 
@@ -93,46 +94,33 @@ postprocess_mortality <- function(DiseaseSummary, mort_data = NULL) {
     tidyr::pivot_wider(names_from = type, values_from = value)
 
   if (!is.null(mort_data)) {
+    variables <- c(full_strata, "year", "cause", "popcount", "mortality_observed",
+                   "mortality_simulated", "yll_simulated")  # max_risk
+    # note: include max_risk in mortality output to check if maximum individual cumulative risk exceeds 1
     long_format <- long_format %>%
-      dplyr::select(
-        year,
-        sex,
-        race,
-        agecat,
-        education,
-        cause,
-        popcount,
-        mortality_observed,
-        mortality_simulated,
-        yll_simulated # ,
-        # # note: include max_risk in mortality output to check if maximum individual cumulative risk exceeds 1
-        # max_risk
-      ) %>%
+      dplyr::select(all_of(variables)) %>%
       dplyr::rename(
         observed_mortality_n = mortality_observed,
         simulated_mortality_n = mortality_simulated,
         simulated_yll_n = yll_simulated
-      ) %>%
-      dplyr::mutate(sex = ifelse(sex == "f", "Women", "Men"))
+      )
   } else{
+    variables <- c(full_strata, "year", "cause", "popcount",
+                   "mortality_simulated", "yll_simulated")  # max_risk
+    # note: include max_risk in mortality output to check if maximum individual cumulative risk exceeds 1
     long_format <- long_format %>%
-      dplyr::select(
-        year,
-        sex,
-        race,
-        agecat,
-        education,
-        cause,
-        popcount,
-        mortality_simulated,
-        yll_simulated # ,
-        # # note: include max_risk in mortality output to check if maximum individual cumulative risk exceeds 1
-        # max_risk
-      ) %>%
-      dplyr::rename(simulated_mortality_n = mortality_simulated,
-                    simulated_yll_n = yll_simulated) %>%
-      dplyr::mutate(sex = ifelse(sex == "f", "Women", "Men"))
-
+      dplyr::select(all_of(variables)) %>%
+      dplyr::rename(
+        simulated_mortality_n = mortality_simulated,
+        simulated_yll_n = yll_simulated
+      )
   }
+
+  if("sex" %in% full_strata) {
+    long_format <- long_format %>%
+      dplyr::mutate(sex = ifelse(sex == "f", "Women", "Men"))
+  }
+
+
   return(long_format)
 }
