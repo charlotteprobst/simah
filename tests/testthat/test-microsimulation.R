@@ -23,7 +23,26 @@ test_that("microsimulation runs with default parameters", {
   expect_type(result, "list")
 
   # Check that all requested output types are present
-  expected_outputs <- c("demographics", "alcoholcat", "alcoholcont", "hed", "mortality")
+  expected_outputs <- c("alcoholcat", "alcoholcont", "demographics", "hed", "mortality")
+  expect_true(all(expected_outputs %in% names(result)))
+})
+
+test_that("microsimulation runs with a subset of stratification variables", {
+
+  substrata <- list(
+    alcoholcat  = c("sex", "agecat", "race"),
+    alcoholcont = c("sex", "agecat", "education"),
+    demographics = c("sex", "education", "race"),
+    mortality = c("agecat", "education")
+  )
+
+  result <- microsimulation(strata=substrata)
+
+  # Check that result is a list
+  expect_type(result, "list")
+
+  # Check that all requested output types are present
+  expected_outputs <- c("alcoholcat", "alcoholcont", "demographics", "hed", "mortality")
   expect_true(all(expected_outputs %in% names(result)))
 })
 

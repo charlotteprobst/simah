@@ -48,7 +48,7 @@ microsimulation <- function(maxyear = 2002,
                             cons_elasticity = -0.1078,
                             cons_elasticity_se = 0.0442,
                             r_sim_obs = 0.8,
-                            output = c("demographics", "alcoholcat", "alcoholcont", "hed", "mortality"),
+                            output = c("alcoholcat", "alcoholcont", "demographics", "hed", "mortality"),
                             strata = list(
                               alcoholcat  = c("sex", "agecat", "education", "race"),
                               alcoholcont = c("sex", "agecat", "education", "race"),
@@ -341,7 +341,9 @@ microsimulation <- function(maxyear = 2002,
   # --- store mortality output in summary ---
   # if ("mortality" %in% output) {
   if ("mortality" %in% output & !is.null(diseases)) {
-    Summary$mortality <- postprocess_mortality(DiseaseSummary, mort_data = NULL) %>%
+    Summary$mortality <- postprocess_mortality(DiseaseSummary,
+                                               full_strata = full_strata,
+                                               mort_data = NULL) %>%
       dplyr::mutate(seed = seed, nunc = nunc, policymodel = policymodel)
   } else if ("mortality" %in% output & is.null(diseases)) {
     Summary$mortality <- lapply(names(RestSummary), function(y) {

@@ -31,8 +31,9 @@ test_that("postprocess_mortality works without mort_data", {
       stringsAsFactors = FALSE
     )
   )
+  full_strata <- c("sex", "agecat", "education", "race")
 
-  results <- postprocess_mortality(dsummary)
+  results <- postprocess_mortality(DiseaseSummary=dsummary, full_strata=full_strata)
   expect_true("simulated_yll_n" %in% names(results))
   expect_true("simulated_mortality_n" %in% names(results))
   expect_true(nrow(results) > 0)
@@ -63,8 +64,9 @@ test_that("postprocess_mortality merges observed data correctly", {
       stringsAsFactors = FALSE
     )
   )
+  full_strata <- c("sex", "agecat", "education", "race")
 
-  results <- postprocess_mortality(dsummary, mort_data)
+  results <- postprocess_mortality(DiseaseSummary=dsummary, full_strata=full_strata, mort_data=mort_data)
   expect_true("observed_mortality_n" %in% names(results))
   expect_true("simulated_mortality_n" %in% names(results))
   expect_true("simulated_yll_n" %in% names(results))
@@ -142,4 +144,37 @@ test_that("postprocess_mortality converts sex codes to labels", {
   expect_true("Men" %in% results$sex)
   expect_true("Women" %in% results$sex)
   expect_true(nrow(results) == 2)
+})
+
+test_that("postprocess_mortality works with a subset of stratification variables", {
+
+  year <- 2000
+  diseases <- c("AUD", "DM", "HLVDC")
+
+  dsummary <- list(
+    data.frame(
+      year = year,
+      sex = c("m", "m", "f", "f"),
+      race = c("White", "Black", "White", "Black"),
+      agecat = c("18-24", "18-24", "18-24", "18-24"),
+      education = c("College", "LEHS", "College", "LEHS"),
+      n = c(1000, 500, 1200, 600),  # population counts
+      mort_AUD = c(10, 15, 8, 12),
+      yll_AUD = c(100, 150, 80, 120),
+      mort_DM = c(5, 8, 3, 6),
+      yll_DM = c(50, 80, 30, 60),
+      mort_HLVDC = c(3, 5, 2, 4),
+      yll_HLVDC = c(30, 50, 20, 40),
+      mort_REST = c(20, 25, 18, 22),
+      yll_REST = c(150, 180, 130, 160),
+      max_risk = c(0.8, 0.9, 0.7, 0.85),
+      stringsAsFactors = FALSE
+    )
+  )
+  full_strata <- c("sex", "agecat")
+
+  results <- postprocess_mortality(DiseaseSummary=dsummary, full_strata=full_strata)
+  expect_true("simulated_yll_n" %in% names(results))
+  expect_true("simulated_mortality_n" %in% names(results))
+  expect_true(nrow(results) > 0)
 })
