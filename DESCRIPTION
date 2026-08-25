@@ -1,6 +1,6 @@
 Package: simah
 Title: SIMAH microsimulation model: Simulation of alcohol control policies for health equity
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: c(
     person("Charlotte", "Probst", email = "charlotte.probst@camh.ca", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-4360-697X")),
     person("Xinyi", "Kou", email = "x.kou@sheffield.ac.uk", role = c("aut"), comment = c(ORCID = "0000-0002-3635-6178")),

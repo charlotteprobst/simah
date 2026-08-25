@@ -1,5 +1,6 @@
 # simah: a microsimulation model for estimating the impact of alcohol control policies on population health 
 
+[![GitHub release (latest by date)](https://shields.io)](https://github.com/charlotteprobst/simah/releases/tag/v1.0.1)
 [![Tests](https://github.com/charlotteprobst/simah/actions/workflows/tests.yml/badge.svg)](https://github.com/charlotteprobst/simah/actions/workflows/tests.yml)
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 
@@ -50,8 +51,8 @@ conda activate simah_r_env
 The model requires external data files for simulation:
 ```bash
 # Download required data files
-curl -L -o inputs_data/data.rds https://figshare.com/ndownloader/files/65734905?private_link=815877ea16ec0d611e36
-curl -L -o inputs_data/svy_data.rds https://figshare.com/ndownloader/files/65734908?private_link=815877ea16ec0d611e36
+curl -L -o inst/extdata/data.rds https://figshare.com/ndownloader/files/65734905?private_link=815877ea16ec0d611e36
+curl -L -o inst/extdata/svy_data.rds https://figshare.com/ndownloader/files/65734908?private_link=815877ea16ec0d611e36
 ```
 
 ## Usage
