@@ -31,6 +31,8 @@
 #' @param nunc numeric identifier for the unique combination of microsimulation parameters
 #' @param microsim_verbosity integer controlling output level: 0 = silent (only errors),
 #'      1 = default (progress info), 2+ = full verbose (detailed logs)
+#' @param config_path the path for the config file that specifies the location of the datasets. In case this input is
+#' NULL then the default.yaml file will be loaded.
 #' @param datalist a list of dataframes with data that can be provided manually, and is required for this package.
 #' This input is set to NULL by default, which means that the data will be loaded instead by the read_data function.
 #' @return a list containing outputs specified in \code{output}, summarized by \code{strata}, for each simulated year
@@ -57,6 +59,7 @@ microsimulation <- function(maxyear = 2002,
                               mortality = c("sex", "agecat", "education", "race")
                             ),
                             seed = 1, nunc = 1, microsim_verbosity = 0,
+                            config_path = NULL,
                             datalist = NULL
                             ){
   set.seed(seed)
@@ -65,7 +68,7 @@ microsimulation <- function(maxyear = 2002,
 
   # READ DATA
   if (is.null(datalist)) {
-    data_list <- read_data()
+    data_list <- read_data(config_path)
   } else {
     data_list <- datalist
   }
