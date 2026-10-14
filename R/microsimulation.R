@@ -139,6 +139,7 @@ microsimulation <- function(maxyear = 2002,
     # to model policy effect on alcohol use
     if (apply_policy & y %in% year_policy) {
 
+      log_verbosity("Policy starts", level = 1, type = "info")
       data <- apply_basic_policy(
         data,
         cons_elasticity,
