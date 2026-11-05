@@ -1,5 +1,6 @@
 #' @title Education update
 #' @description Updates education categories for the individuals in data
+#' @param data a data frame containing the synthetic baseline population
 #' @param covid_scenario indicator specifying which COVID scenario to model; 0 (= non-COVID),
 #' 1 (non-COVID before 2020 and after 2022 / COVID in 2020-2022), or 2 (= non-COVID before 2020 / COVID after 2020)
 #' @param cyear current simulation year

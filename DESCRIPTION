@@ -1,5 +1,5 @@
 Package: simah
-Title: SIMAH microsimulation model: Simulation of alcohol control policies for health equity
+Title: Simulation of Alcohol Control Policies for Health Equity
 Version: 1.0.2
 Authors@R: c(
     person("Charlotte", "Probst", email = "charlotte.probst@camh.ca", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-4360-697X")),
@@ -7,10 +7,11 @@ Authors@R: c(
     person("Charlotte", "Buckley", email = "charlotte.buckley@liverpool.ac.uk", role = c("aut"), comment = c(ORCID = "0000-0002-8430-0347")),
     person("João António", "Fialho Vilas Boas Duro", email = "j.a.duro@sheffield.ac.uk", role = c("aut"), comment = c(ORCID = "0000-0002-7684-4707")),
     person("Julia", "Lemp", email = "julia.lemp@uni-heidelberg.de", role = c("aut"), comment = c(ORCID = "0000-0002-1524-3641")),
-    person("Robin", "Purshouse", email = "r.purshouse.sheffield.ac.uk", role = c("aut"), comment = c(ORCID = "0000-0001-5880-1925"))
+    person("Robin", "Purshouse", email = "r.purshouse@sheffield.ac.uk", role = c("aut"), comment = c(ORCID = "0000-0001-5880-1925"))
     )
 Description: Microsimulation model for estimating the effects of alcohol control policies on alcohol consumption levels, mortality rates, years of live lost, and health inequalities within population subgroups.
-License: `use_lgpl_license()`
+Maintainer: Charlotte Probst <charlotte.probst@camh.ca>
+License: LGPL (>= 3)
 Imports: 
     dplyr,
     data.table,
@@ -29,7 +30,8 @@ Imports:
     utils,
     yaml
 Suggests:
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    tibble
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3

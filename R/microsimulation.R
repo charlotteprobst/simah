@@ -101,8 +101,9 @@ microsimulation <- function(maxyear = 2002,
     log_verbosity("Policy is not within model time frame", level = 1, type = "warn")
   }
 
-  policy_intervention <- ifelse(apply_policy, "intervention", "no intervention")
-  log_verbosity(paste0("Alcohol policy with ", policy_intervention), level = 1, type = "info")
+  if(!apply_policy) {
+    log_verbosity("No policy", level = 1, type = "info")
+  }
 
   if(apply_policy) {
     log_verbosity(paste0("Alcohol policy intervention type is ", policy), level = 1, type = "info")

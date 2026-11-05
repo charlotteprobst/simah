@@ -1,5 +1,6 @@
 #' @title Reads project datasets
 #' @description Read the datasets that are essential for running the simah microsimulation
+#' @param config_path the path to the configuration file, such as default.yaml, which by default is located in the inst/config folder
 #' @return a list of data frames, and these consist of:
 #' data a data frame containing the synthetic baseline population, with at least columns \code{ID}, \code{age}, \code{sex}, \code{race},
 #'      \code{education}, \code{education_detailed}, \code{drinkingstatus}, \code{alc_cat}, \code{alc_gpd}, \code{formerdrinker}
