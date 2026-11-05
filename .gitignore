@@ -1,2 +1,5 @@
 .github/
 .idea/
+simah.Rcheck/
+inst/extdata/data.rds
+inst/extdata/svy_data.rds
