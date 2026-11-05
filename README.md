@@ -42,7 +42,7 @@ Rscript -e "devtools::load_all('.')"
 
 ### Using Conda
 ```bash
-conda env create -f simah_env.yaml
+conda env create -f conda/simah_env.yaml
 conda activate simah_r_env
 ```
 

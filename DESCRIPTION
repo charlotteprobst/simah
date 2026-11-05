@@ -11,7 +11,7 @@ Authors@R: c(
     )
 Description: Microsimulation model for estimating the effects of alcohol control policies on alcohol consumption levels, mortality rates, years of live lost, and health inequalities within population subgroups.
 Maintainer: Charlotte Probst <charlotte.probst@camh.ca>
-License: LGPL (>= 3)
+License: LGPL (>= 3) + file LICENSE
 Imports: 
     dplyr,
     data.table,
