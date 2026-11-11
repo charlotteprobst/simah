@@ -4,6 +4,8 @@ library(testthat)
 # Set verbosity to suppress warnings during tests
 options(microsim_verbosity = 0)
 
+# devtools::load_all(".")
+
 # Load necessary mock data
 basepop <- readr::read_rds(system.file("extdata", "data.rds", package = "simah"))
 mort_data <- readr::read_rds(system.file("extdata", "mort_data.rds", package = "simah"))

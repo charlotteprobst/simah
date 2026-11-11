@@ -3,7 +3,7 @@
 #' @param data a data frame containing the synthetic population, with columns \code{alc_gpd}, \code{hed_binary} and \code{formerdrinker}
 #' @param risk_param a data frame containing the risk function parameters for all diseases.
 #' @return a data frame identical to \code{data} with an additional column containing \code{RR_MVACC} values.
-#' @importFrom dplyr %>% mutate case_when
+#' @importFrom dplyr %>% mutate case_when .data
 #' @keywords motor vehicle injuries, MVACC, RR
 #' @export
 assign_rr_mvacc <- function(data, risk_param) {
@@ -24,7 +24,7 @@ assign_rr_mvacc <- function(data, risk_param) {
         alc_gpd >= 150                  ~ exp(B_MVACC1 * 150 + B_MVACC2),
         TRUE ~ NA  # Explicit catch-all
       ),
-      RR_MVACC = ifelse(formerdrinker == TRUE, exp(MVACC_FORMERDRINKER), RR_MVACC)
+      RR_MVACC = ifelse(.data$formerdrinker == TRUE, exp(MVACC_FORMERDRINKER), .data$RR_MVACC)
     )
 
   return(data)

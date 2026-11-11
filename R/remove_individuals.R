@@ -9,7 +9,7 @@
 #' @param inflation_factors a vector with inflation factors that were applied to age categories with low
 #' death counts (in \code{age_inflated}) to stabilize mortality simulation
 #' @return the synthetic population remaining after removing individuals who died from alcohol-related causes of death
-#' @importFrom dplyr %>% mutate filter select group_by ungroup add_tally do
+#' @importFrom dplyr %>% mutate filter select group_by ungroup add_tally do .data
 #' @importFrom rlang sym
 #' @keywords microsimulation, mortality, cause of death
 #' @export
@@ -23,18 +23,18 @@ remove_individuals <- function(data, disease, age_inflated, inflation_factors) {
     dplyr::add_tally() %>%   # this adds the n column with the per-group row count to every row
     dplyr::mutate(
       ageCAT = cut(
-        age,
+        .data$age,
         breaks = c(0, 24, 34, 44, 54, 64, 74, 79),
         labels = c("18-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75-79")
       ),
       # identify inflation factor by age category
       inflation_factor = ifelse(
-        ageCAT %in% age_inflated[[1]],
+        .data$ageCAT %in% age_inflated[[1]],
         inflation_factors[1],
-        ifelse(ageCAT %in% age_inflated[[2]], inflation_factors[2], NA)
+        ifelse(.data$ageCAT %in% age_inflated[[2]], inflation_factors[2], NA)
       ),
       # de-inflate to identify correct number of individuals to remove
-      nremove = round(n / inflation_factor)
+      nremove = round(.data$n / .data$inflation_factor)
     )
 
   # ---- HELPER FUNCTION ----
@@ -57,7 +57,7 @@ remove_individuals <- function(data, disease, age_inflated, inflation_factors) {
   # remove individuals
   removed <- toremove %>%
     dplyr::ungroup() %>%
-    dplyr::filter(nremove >= 1) %>%
+    dplyr::filter(.data$nremove >= 1) %>%
     dplyr::group_by(cat) %>%
     dplyr::do(removingfunction(., disease = disease))
 
@@ -65,7 +65,7 @@ remove_individuals <- function(data, disease, age_inflated, inflation_factors) {
   ids <- removed$ID
   # remove the individuals with the specified IDs
   data <- data %>%
-    dplyr::filter(!ID %in% ids)
+    dplyr::filter(!.data$ID %in% ids)
 
   # remove unnecessary columns of a given cause of death (disease)
   data <- data %>%

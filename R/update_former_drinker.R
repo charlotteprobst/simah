@@ -5,24 +5,24 @@
 #' @param data a data frame containing the synthetic population, with minimum variables \code{drinkingstatus},
 #' \code{formerdrinker}, \code{agecat}, and \code{sex}
 #' @return the synthetic population with updated former drinker status for abstainers
-#' @importFrom dplyr %>% mutate filter select group_by ungroup left_join tally
+#' @importFrom dplyr %>% mutate filter select group_by ungroup left_join tally .data
 #' @importFrom stats runif
 #' @keywords microsimulation, former drinker, abstainer
 #' @export
 update_former_drinker <- function(data){
   # filter data for abstainers and calculate proportion of former drinkers by sex and age category
   temp <- data %>%
-    dplyr::filter(drinkingstatus == FALSE) %>%
-    dplyr::group_by(agecat, sex,formerdrinker) %>%
+    dplyr::filter(.data$drinkingstatus == FALSE) %>%
+    dplyr::group_by(.data$agecat, .data$sex, .data$formerdrinker) %>%
     dplyr::tally() %>%
     dplyr::ungroup() %>%
-    dplyr::group_by(agecat, sex) %>%
-    dplyr::mutate(prop_former_drinker=n/sum(n))
+    dplyr::group_by(.data$agecat, .data$sex) %>%
+    dplyr::mutate(prop_former_drinker=.data$n/sum(.data$n))
 
   # store and add former drinker proportion to full data
   temp2 <- temp %>%
-    dplyr::filter(formerdrinker == TRUE) %>%
-    dplyr::select(-(formerdrinker))
+    dplyr::filter(.data$formerdrinker == TRUE) %>%
+    dplyr::select(-(.data$formerdrinker))
 
   temp3 <- dplyr::left_join(data, temp2, by = c("sex", "agecat"))
 
@@ -30,15 +30,15 @@ update_former_drinker <- function(data){
   temp3$prob <- stats::runif(nrow(temp3))
 
   abstainers <- temp3 %>%
-    dplyr::filter(drinkingstatus == FALSE) %>%
+    dplyr::filter(.data$drinkingstatus == FALSE) %>%
     dplyr::mutate(
-      formerdrinker = ifelse(prob<=prop_former_drinker, TRUE, FALSE)
+      formerdrinker = ifelse(.data$prob <= .data$prop_former_drinker, TRUE, FALSE)
       ) %>%
-    dplyr::select(-c(prob, n, prop_former_drinker))
+    dplyr::select(-c(.data$prob, .data$n, .data$prop_former_drinker))
 
   # combine and return individuals who drink (unchanged) and abstainers with updated former drinker status
   drinkers <- data %>%
-    dplyr::filter(drinkingstatus == TRUE)
+    dplyr::filter(.data$drinkingstatus == TRUE)
 
   data_post <- rbind(drinkers, abstainers)
 

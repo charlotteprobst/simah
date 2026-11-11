@@ -7,7 +7,7 @@
 #'                        with at least columns \code{agecat}, \code{race}, \code{sex}, \code{year}, and \code{migrationoutrate}
 #' @param cyear current simulation year
 #' @return the synthetic population remaining after removing outward migrant individuals
-#' @importFrom dplyr %>% mutate filter select group_by summarise left_join do sample_n
+#' @importFrom dplyr %>% mutate filter select group_by summarise left_join do sample_n .data
 #' @importFrom tidyr drop_na
 #' @keywords outward migration, population exit
 #' @export
@@ -19,22 +19,22 @@ remove_emigrants <- function(data, migration_rates, cyear) {
   age_groups <- c("18", "19-24", "25-29", "30-34", "35-39", "40-44", "45-49",
                   "50-54", "55-59", "60-64", "65-69", "70-74", "75-79")
   emigrants <- data %>%
-    dplyr::mutate(n = 1, agecat = cut(age, breaks = age_breaks, labels = age_groups)) %>%
-    dplyr::group_by(agecat, race, sex, .drop = FALSE) %>%
-    dplyr::summarise(n = sum(n))
+    dplyr::mutate(n = 1, agecat = cut(.data$age, breaks = age_breaks, labels = age_groups)) %>%
+    dplyr::group_by(.data$agecat, .data$race, .data$sex, .drop = FALSE) %>%
+    dplyr::summarise(n = sum(.data$n))
 
   # extract outward migration rates for the specified simulation year, stratified by age categories, race and sex
-  migout <- dplyr::filter(migration_rates, year == cyear) %>%
-    dplyr::select(agecat, sex, race, migrationoutrate) %>%
+  migout <- dplyr::filter(migration_rates, .data$year == cyear) %>%
+    dplyr::select(.data$agecat, .data$sex, .data$race, .data$migrationoutrate) %>%
     dplyr::distinct() %>%
     tidyr::drop_na()
 
   # convert outward migration rates into absolute numbers of individuals to be removed from each demographic subgroup;
   # if the calculated number to remove exceeds the available population size in a subgroup, cap removals at the subgroup population size
   emigrants <- dplyr::left_join(emigrants, migout, by = c("agecat", "race", "sex"))
-  emigrants <- emigrants %>% dplyr::mutate(toremove = migrationoutrate * n,
-                                           toremove = ifelse(toremove > n, n, toremove)) %>%
-    dplyr::select(agecat, race, sex, toremove)
+  emigrants <- emigrants %>% dplyr::mutate(toremove = .data$migrationoutrate * .data$n,
+                                           toremove = ifelse(toremove > .data$n, .data$n, toremove)) %>%
+    dplyr::select(.data$agecat, .data$race, .data$sex, .data$toremove)
 
   # assign age categories to each individual in the synthetic population to enable matching with subgroup-level removal targets
   temp_data <- data
@@ -50,12 +50,12 @@ remove_emigrants <- function(data, migration_rates, cyear) {
     basepopremoved <- data
   } else if (length(unique(temp_data$toremove)) > 1) {
     # sample the required number of individuals for subgroups with positive removal targets
-    toremove <- temp_data %>% dplyr::group_by(agecat, race, sex) %>%
+    toremove <- temp_data %>% dplyr::group_by(.data$agecat, .data$race, .data$sex) %>%
       dplyr::do(dplyr::sample_n(., size = unique(toremove), replace = FALSE))
     # identify IDs selected for removal
     ids <- unique(toremove$ID)
     # remove selected individuals from the synthetic population
-    basepopremoved <- temp_data %>% dplyr::filter(!ID %in% ids) %>% dplyr::select(-toremove)
+    basepopremoved <- temp_data %>% dplyr::filter(!.data$ID %in% ids) %>% dplyr::select(-toremove)
   }
 
   return(basepopremoved)

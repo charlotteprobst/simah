@@ -6,13 +6,13 @@
 #' @param cons_elasticity_se a vector containing standard errors corresponding to consumption elasticities for beer, wine, spirits
 #' @param r_sim_obs correlation between baseline consumption and individual response to price change, numeric
 #' @return a data frame identical to \code{data} but with updated \code{alc_gpd} values.
-#' @importFrom dplyr %>% mutate select
+#' @importFrom dplyr %>% mutate select .data
 #' @importFrom faux rnorm_pre
 #' @keywords tax policy
 #' @export
 apply_basic_policy <- function(data, cons_elasticity, cons_elasticity_se, r_sim_obs) {
 
-  filtered_pop <- data %>% dplyr::filter(alc_cat != "Non-drinker")
+  filtered_pop <- data %>% dplyr::filter(.data$alc_cat != "Non-drinker")
   if(nrow(filtered_pop) == 0) {
     msg <- "The population data frame only consists of Non-drikers. Tax policy is not being processed."
     log_verbosity(msg, level = 1, type = "warn")
@@ -23,23 +23,23 @@ apply_basic_policy <- function(data, cons_elasticity, cons_elasticity_se, r_sim_
   newGPD <- filtered_pop %>%
     dplyr::mutate(
       percentreduction = faux::rnorm_pre(
-        log(alc_gpd) ^ 2,
+        log(.data$alc_gpd) ^ 2,
         mu = cons_elasticity,
         sd = cons_elasticity_se,
         r = r_sim_obs,
         empirical = T
       ),
-      newGPD = alc_gpd + (alc_gpd * percentreduction)
+      newGPD = .data$alc_gpd + (.data$alc_gpd * .data$percentreduction)
     ) %>%
-    dplyr::select(ID, percentreduction, newGPD)
+    dplyr::select(.data$ID, .data$percentreduction, newGPD)
 
   # merge simulated percent reduction into data
   data_out <- merge(data, newGPD, by = "ID", all.x = T) %>%
-    dplyr::mutate(alc_gpd = ifelse(alc_gpd != 0, newGPD, 0)) %>%
-    dplyr::select(-c(newGPD, percentreduction))
+    dplyr::mutate(alc_gpd = ifelse(.data$alc_gpd != 0, newGPD, 0)) %>%
+    dplyr::select(-c(newGPD, .data$percentreduction))
 
   # Ensure that new grams per day are not sampled below zero
-  data_out <- data_out %>% dplyr::mutate(alc_gpd = ifelse(alc_gpd < 0, 0, alc_gpd))
+  data_out <- data_out %>% dplyr::mutate(alc_gpd = ifelse(.data$alc_gpd < 0, 0, .data$alc_gpd))
 
   return(data_out)
 }

@@ -6,7 +6,7 @@
 #' @param hed_model2 ML-driven model everyone except young and old men
 #' @param hed_model3 ML-driven model for old men
 #' @return synthetic population, with an updated HED variable
-#' @importFrom dplyr %>% mutate filter case_when
+#' @importFrom dplyr %>% mutate filter case_when .data
 #' @keywords heavy episodic drinking, HED, machine learning
 #' @export
 update_hed <- function(data, hed_model1, hed_model2, hed_model3){
@@ -26,17 +26,17 @@ update_hed <- function(data, hed_model1, hed_model2, hed_model3){
   # prepare data for each population subset
   # young men
   newdata_youngmen <- newdata %>%
-    dplyr::filter(age < 35, sex == "m")
+    dplyr::filter(.data$age < 35, .data$sex == "m")
 
   newdata_youngmen$sex <- NULL
 
   # predict on everyone other than young men, but going to only apply to women
   newdata_else <- newdata %>%
-    dplyr::filter(!(sex == "m" & age < 35))
+    dplyr::filter(!(.data$sex == "m" & .data$age < 35))
 
   # old men
   newdata_oldmen <- newdata %>%
-    dplyr::filter(age >= 35 & sex == "m")
+    dplyr::filter(.data$age >= 35 & .data$sex == "m")
 
   newdata_oldmen$sex <- NULL
 
@@ -56,7 +56,7 @@ update_hed <- function(data, hed_model1, hed_model2, hed_model3){
   newdata_else$pred_bin2 <- pred_bin2
 
   pred_bin2 <- newdata_else %>%
-    dplyr::filter(sex == "f")
+    dplyr::filter(.data$sex == "f")
 
   pred_bin2 <- pred_bin2$pred_bin2
   

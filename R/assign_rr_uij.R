@@ -4,7 +4,7 @@
 #' @param data a data frame containing the synthetic population, with columns \code{alc_gpd}, \code{hed_binary} and \code{formerdrinker}
 #' @param risk_param a data frame containing the risk function parameters for all diseases
 #' @return a data frame identical to \code{data} with an additional column containing \code{RR_UIJ} values
-#' @importFrom dplyr %>% mutate case_when
+#' @importFrom dplyr %>% mutate case_when .data
 #' @keywords other unintentional injuries, UIJ, RR
 #' @export
 assign_rr_uij <- function(data, risk_param) {
@@ -25,7 +25,7 @@ assign_rr_uij <- function(data, risk_param) {
         alc_gpd >= 150 ~ exp(B_UIJ1 * 150 + B_UIJ2),
         TRUE ~ NA  # Explicit catch-all
       ),
-      RR_UIJ = ifelse(formerdrinker == TRUE , exp(UIJ_FORMERDRINKER), RR_UIJ)
+      RR_UIJ = ifelse(.data$formerdrinker == TRUE , exp(UIJ_FORMERDRINKER), .data$RR_UIJ)
       )
 
   return(data)

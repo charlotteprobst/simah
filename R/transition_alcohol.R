@@ -4,7 +4,7 @@
 #' @param data a data frame containing the synthetic population
 #' @param model a data frame containing the coefficients of the ordinal regression model
 #' @return a data frame identical to \code{data} with updated \code{alc_cat}
-#' @importFrom dplyr %>% mutate select case_when
+#' @importFrom dplyr %>% mutate select case_when .data
 #' @importFrom tidyr pivot_wider
 #' @importFrom stats runif sd
 #' @keywords microsimulation, alcohol transition, ordinal regression model
@@ -27,35 +27,35 @@ transition_alcohol <- function(data, model) {
   data_prediction <- data %>%
     dplyr::mutate(
       agecat = cut(
-        age,
+        .data$age,
         breaks = c(0, 24, 64, 100),
         labels = c("18-24", "25-64", "65+")
       ),
-      education = ifelse(education == "College" & agecat == "18-24", "SomeC", education),
-      abstainer = ifelse(alc_cat == "Non-drinker" & formerdrinker == FALSE, TRUE, FALSE)
+      education = ifelse(.data$education == "College" & .data$agecat == "18-24", "SomeC", .data$education),
+      abstainer = ifelse(.data$alc_cat == "Non-drinker" & .data$formerdrinker == FALSE, TRUE, FALSE)
     ) %>%
-    dplyr::select(agecat, sex, race, education, alc_gpd, alc_cat, formerdrinker) %>%
+    dplyr::select(.data$agecat, .data$sex, .data$race, .data$education, .data$alc_gpd, .data$alc_cat, .data$formerdrinker) %>%
     dplyr::mutate(
-      Women = ifelse(sex == "f", 1, 0),
-      age2564 = ifelse(agecat == "25-64", 1, 0),
-      age65 = ifelse(agecat == "65+", 1, 0),
-      raceblack = ifelse(race == "Black", 1, 0),
-      racehispanic = ifelse(race == "Hispanic", 1, 0),
-      raceother = ifelse(race == "Others", 1, 0),
-      edulow = ifelse(education == "LEHS", 1, 0),
-      edumed = ifelse(education == "SomeC", 1, 0),
-      formerdrinker = ifelse(formerdrinker == TRUE, TRUE, FALSE),
-      abstainer = ifelse(alc_gpd == 0, TRUE, FALSE),
-      cat1 = ifelse(alc_cat == "Low risk", 1, 0),
-      cat2 = ifelse(alc_cat == "Medium risk", 1, 0),
-      cat3 = ifelse(alc_cat == "High risk", 1, 0),
-      cat0 = ifelse(alc_cat == "Non-drinker", 1, 0),
-      alc_scaled = (alc_gpd - mean(alc_gpd)) / stats::sd(alc_gpd)
+      Women = ifelse(.data$sex == "f", 1, 0),
+      age2564 = ifelse(.data$agecat == "25-64", 1, 0),
+      age65 = ifelse(.data$agecat == "65+", 1, 0),
+      raceblack = ifelse(.data$race == "Black", 1, 0),
+      racehispanic = ifelse(.data$race == "Hispanic", 1, 0),
+      raceother = ifelse(.data$race == "Others", 1, 0),
+      edulow = ifelse(.data$education == "LEHS", 1, 0),
+      edumed = ifelse(.data$education == "SomeC", 1, 0),
+      formerdrinker = ifelse(.data$formerdrinker == TRUE, TRUE, FALSE),
+      abstainer = ifelse(.data$alc_gpd == 0, TRUE, FALSE),
+      cat1 = ifelse(.data$alc_cat == "Low risk", 1, 0),
+      cat2 = ifelse(.data$alc_cat == "Medium risk", 1, 0),
+      cat3 = ifelse(.data$alc_cat == "High risk", 1, 0),
+      cat0 = ifelse(.data$alc_cat == "Non-drinker", 1, 0),
+      alc_scaled = (.data$alc_gpd - mean(.data$alc_gpd)) / stats::sd(.data$alc_gpd)
     )
 
   # reshape model coefficients
-  coefs <- model %>% dplyr::select(name, Value) %>%
-    tidyr::pivot_wider(names_from = name, values_from = Value)
+  coefs <- model %>% dplyr::select(.data$name, .data$Value) %>%
+    tidyr::pivot_wider(names_from = .data$name, values_from = .data$Value)
 
   # calculate linear predictions using ordinal regression model
   data_prediction$linearpred <-

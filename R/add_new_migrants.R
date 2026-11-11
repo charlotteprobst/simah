@@ -9,7 +9,7 @@
 #'                 \code{drinkingstatus}, \code{alc_gpd}, \code{BMI}, \code{income}, \code{formerdrinker}, \code{education_detailed}, \code{alc_cat}
 #' @param cyear current simulation year
 #' @return a data frame identical to \code{data}, with newly added inward migrant individuals appended to the synthetic population
-#' @importFrom dplyr %>% mutate filter select group_by ungroup left_join tally do sample_n
+#' @importFrom dplyr %>% mutate filter select group_by ungroup left_join tally do sample_n .data
 #' @importFrom tidyr drop_na
 #' @keywords inward migration, population entry
 #' @export
@@ -27,8 +27,8 @@ add_new_migrants <- function(data, migration_rates, cyear, svy_data) {
 
   # extract inward migration rates for the specified simulation year, stratified by age categories, race and sex
   migrants <- migration_rates %>%
-    dplyr::filter(year == cyear) %>%
-    dplyr::select(agecat, race, sex, migrationinrate) %>%
+    dplyr::filter(.data$year == cyear) %>%
+    dplyr::select(.data$agecat, .data$race, .data$sex, .data$migrationinrate) %>%
     tidyr::drop_na()
 
   # calculate the denominator of the inward migration rates,
@@ -37,8 +37,8 @@ add_new_migrants <- function(data, migration_rates, cyear, svy_data) {
   age_groups <- c("18", "19-24", "25-29", "30-34", "35-39", "40-44", "45-49",
                   "50-54", "55-59", "60-64", "65-69", "70-74", "75-79")
   denominator <- data %>%
-    dplyr::mutate(agecat = cut(age, breaks = age_breaks, labels = age_groups)) %>%
-    dplyr::group_by(race, sex, agecat) %>%
+    dplyr::mutate(agecat = cut(.data$age, breaks = age_breaks, labels = age_groups)) %>%
+    dplyr::group_by(.data$race, .data$sex, .data$agecat) %>%
     dplyr::tally()
 
   # convert inward migration rates into absolute counts of new inward migrants
@@ -58,10 +58,10 @@ add_new_migrants <- function(data, migration_rates, cyear, svy_data) {
   if (cyear <= 2022) {
     # for years up to and including 2022, use survey data
     pool <- svy_data %>%
-      dplyr::filter(YEAR >= windowmin & YEAR <= windowmax) %>%
+      dplyr::filter(.data$YEAR >= windowmin & .data$YEAR <= windowmax) %>%
       dplyr::mutate(
-        agecat = cut(age, breaks = age_breaks, labels = age_groups),
-        cat = paste(sex, agecat, race, sep = "_")
+        agecat = cut(.data$age, breaks = age_breaks, labels = age_groups),
+        cat = paste(.data$sex, .data$agecat, .data$race, sep = "_")
       )
   }
 
@@ -69,38 +69,11 @@ add_new_migrants <- function(data, migration_rates, cyear, svy_data) {
     # for years after 2022, use the existing synthetic population
     pool <- data %>%
       dplyr::mutate(
-        agecat = cut(age, breaks = age_breaks, labels = age_groups),
-        cat = paste(sex, agecat, race, sep = "_")
+        agecat = cut(.data$age, breaks = age_breaks, labels = age_groups),
+        cat = paste(.data$sex, .data$agecat, .data$race, sep = "_")
       ) %>%
-      dplyr::select(age:BMI, agecat:alc_cat, cat)
+      dplyr::select(.data$age:.data$BMI, .data$agecat:.data$alc_cat, .data$cat)
   }
-
-  # identify population categories required for entry that are missing from the donor population pool
-  # brfsscats <- unique(pool$cat)
-  # missing <- setdiff(cats, brfsscats)
-
-  # if (length(missing) > 0) {
-  #   # summarise missing population categories
-  #   summarymissing <- data.frame(
-  #     YEAR = y,
-  #     ncatsmissing = length(missing),
-  #     whichcatsmissing = paste(missing),
-  #     npopmissing = summary$toadd,
-  #     npoptotal = sum(tojoin$toadd),
-  #     percentmissing = summary$toadd / sum(tojoin$toadd)
-  #   )
-  #
-  # } else {
-  #   # no missing population categories
-  #   summarymissing <- data.frame(
-  #     YEAR = y,
-  #     ncatsmissing = 0,
-  #     whichcatsmissing = 0,
-  #     npopmissing = 0,
-  #     npoptotal = sum(tojoin$toadd, na.rm = T),
-  #     percentmissing = 0
-  #   )
-  # }
 
   # create a filtered pool of individuals to be sampled for entry into the synthetic population
   filtered_pool <- dplyr::left_join(pool, tojoin, by = c("cat")) %>% dplyr::filter(toadd != 0)
@@ -124,27 +97,6 @@ add_new_migrants <- function(data, migration_rates, cyear, svy_data) {
     # Remove temporary columns
     toadd <- toadd %>% dplyr::select(-c("cat", "toadd"))
   }
-
-  # sample the required number of new individuals for each population category and prepare them for entry into the synthetic population
-  # toadd <- dplyr::left_join(pool, tojoin, by = c("cat")) %>% dplyr::filter(toadd != 0) %>% dplyr::group_by(cat) %>%
-  #   dplyr::do(dplyr::sample_n(., size = unique(toadd), replace = TRUE)) %>%
-  #   dplyr::mutate(spawn_year = y, hed_binary = NA) %>% dplyr::ungroup() %>%
-  #   dplyr::select(
-  #     age,
-  #     race,
-  #     sex,
-  #     education,
-  #     drinkingstatus,
-  #     alc_gpd,
-  #     BMI,
-  #     income,
-  #     spawn_year,
-  #     agecat,
-  #     formerdrinker,
-  #     education_detailed,
-  #     alc_cat,
-  #     hed_binary
-  #   )
 
   # assign unique IDs to newly added inward migrants
   from <- max(data$ID) + 1

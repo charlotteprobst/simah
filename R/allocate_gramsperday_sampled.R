@@ -6,30 +6,30 @@
 #' @param data a data frame containing the synthetic population
 #' @param catcontmodel a data frame containing the parameters of the beta distributions
 #' @return a data frame identical to \code{data} with updated \code{alc_gpd}
-#' @importFrom dplyr %>% mutate filter select group_by ungroup left_join case_when do
+#' @importFrom dplyr %>% mutate filter select group_by ungroup left_join case_when do .data
 #' @keywords microsimulation, continuous, grams per day
 #' @export
 allocate_gramsperday_sampled <- function(data, catcontmodel) {
   # prepare data set with the required variables to apply beta distributions
   prepdata <- data %>%
-    dplyr::filter(alc_cat != "Non-drinker" & totransitioncont == 1) %>%
+    dplyr::filter(.data$alc_cat != "Non-drinker" & .data$totransitioncont == 1) %>%
     dplyr::mutate(
-      age_var = age,
-      sex_recode = ifelse(sex == "m", "Male", "Female"),
+      age_var = .data$age,
+      sex_recode = ifelse(.data$sex == "m", "Male", "Female"),
       agecat = cut(
-        age,
+        .data$age,
         breaks = c(0, 24, 64, 100),
         labels = c("18-24", "25-64", "65+")
       ),
-      education = ifelse(agecat == "18-24" & education == "College", "SomeC", education),
-      education_summary = education,
-      race_eth = ifelse(race == "Others", "Other", race),
+      education = ifelse(.data$agecat == "18-24" & .data$education == "College", "SomeC", .data$education),
+      education_summary = .data$education,
+      race_eth = ifelse(.data$race == "Others", "Other", .data$race),
       group = paste(
-        alc_cat,
-        education_summary,
-        agecat,
-        race_eth,
-        sex_recode,
+        .data$alc_cat,
+        .data$education_summary,
+        .data$agecat,
+        .data$race_eth,
+        .data$sex_recode,
         sep = "_"
       )
     )
@@ -53,9 +53,9 @@ allocate_gramsperday_sampled <- function(data, catcontmodel) {
   }
 
   # apply function to sample grams per day
-  prepdata <- prepdata %>% dplyr::group_by(group) %>% dplyr::do(samplegpd(.)) %>%
-    dplyr::mutate(alc_gpd = newgpd) %>% dplyr::ungroup() %>%
-    dplyr::select(ID, newgpd)
+  prepdata <- prepdata %>% dplyr::group_by(.data$group) %>% dplyr::do(samplegpd(.)) %>%
+    dplyr::mutate(alc_gpd = .data$newgpd) %>% dplyr::ungroup() %>%
+    dplyr::select(.data$ID, .data$newgpd)
 
   # join sampled values to synthetic population
   data <- dplyr::left_join(data, prepdata, by = c("ID"))

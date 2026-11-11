@@ -12,7 +12,7 @@
 #' @param cyear current simulation year
 #' @return a data frame identical to \code{data}, with newly added 18-year-old individuals appended to the synthetic
 #' population
-#' @importFrom dplyr %>% mutate filter select group_by ungroup left_join tally do sample_n
+#' @importFrom dplyr %>% mutate filter select group_by ungroup left_join tally do sample_n .data
 #' @importFrom tidyr drop_na
 #' @keywords births, population entry, 18-year-old population
 #' @export
@@ -29,9 +29,9 @@ add_new_18yo <- function(data, migration_rates, cyear, svy_data) {
   }
 
   # extract age-18 entry (birth) rates for the specified simulation year, stratified by race and sex
-  births <- migration_rates %>% dplyr::filter(agecat == "18") %>%
-    dplyr::filter(year == cyear) %>%
-    dplyr::select(agecat, race, sex, birthrate) %>%
+  births <- migration_rates %>% dplyr::filter(.data$agecat == "18") %>%
+    dplyr::filter(.data$year == cyear) %>%
+    dplyr::select(.data$agecat, .data$race, .data$sex, .data$birthrate) %>%
     tidyr::drop_na()
 
   # calculate the denominator of the rates, which is the total population counts by race and sex in the current
@@ -40,8 +40,8 @@ add_new_18yo <- function(data, migration_rates, cyear, svy_data) {
   age_groups <- c("18", "19-24", "25-29", "30-34", "35-39", "40-44", "45-49",
                   "50-54", "55-59", "60-64", "65-69", "70-74", "75-79")
   denominator <- data %>%
-    dplyr::mutate(agecat = cut(age, breaks = age_breaks, labels = age_groups)) %>%
-    dplyr::group_by(race, sex) %>%
+    dplyr::mutate(agecat = cut(.data$age, breaks = age_breaks, labels = age_groups)) %>%
+    dplyr::group_by(.data$race, .data$sex) %>%
     dplyr::tally()
 
   # convert entry (birth) rates into absolute counts of new 18-year-olds
@@ -59,10 +59,10 @@ add_new_18yo <- function(data, migration_rates, cyear, svy_data) {
 
   # construct a donor population pool based on survey data
   pool <- svy_data %>%
-    dplyr::filter(YEAR >= windowmin & YEAR <= windowmax) %>%
+    dplyr::filter(.data$YEAR >= windowmin & .data$YEAR <= windowmax) %>%
     dplyr::mutate(
-      agecat = cut(age, breaks = age_breaks, labels = age_groups),
-      cat = paste(sex, agecat, race, sep = "_")
+      agecat = cut(.data$age, breaks = age_breaks, labels = age_groups),
+      cat = paste(.data$sex, .data$agecat, .data$race, sep = "_")
     )
 
   # create a filtered pool of individuals to be sampled for entry into the synthetic population

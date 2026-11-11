@@ -36,7 +36,7 @@
 #' @param datalist a list of dataframes with data that can be provided manually, and is required for this package.
 #' This input is set to NULL by default, which means that the data will be loaded instead by the read_data function.
 #' @return a list containing outputs specified in \code{output}, summarized by \code{strata}, for each simulated year
-#' @importFrom dplyr %>% mutate filter select group_by ungroup summarise left_join all_of across reframe bind_rows
+#' @importFrom dplyr %>% mutate filter select group_by ungroup summarise left_join all_of across reframe bind_rows .data
 #' @importFrom stats sd
 #' @importFrom rlang sym is_empty
 #' @keywords microsimulation, main function
@@ -163,16 +163,16 @@ microsimulation <- function(maxyear = 2002,
 
         Summary[["alcoholcont"]][[paste(y)]] <- data %>%
           dplyr::mutate(year = y, agecat = cut(
-            age,
+            .data$age,
             breaks = c(0, 24, 64, 100),
             labels = c("18-24", "25-64", "65+")
           )) %>%
           dplyr::group_by(dplyr::across(dplyr::all_of(full_strata)), .drop = FALSE) %>%
           dplyr::reframe(
-            meansimulation = mean(alc_gpd, na.rm = TRUE),
-            sdsimulation   = stats::sd(alc_gpd, na.rm = TRUE),
-            n_hed = sum(hed_binary, na.rm = TRUE),
-            hed_prop = mean(hed_binary, na.rm = TRUE),
+            meansimulation = mean(.data$alc_gpd, na.rm = TRUE),
+            sdsimulation   = stats::sd(.data$alc_gpd, na.rm = TRUE),
+            n_hed = sum(.data$hed_binary, na.rm = TRUE),
+            hed_prop = mean(.data$hed_binary, na.rm = TRUE),
             seed = seed,
             nunc = nunc,
             policymodel = as.character(policymodel)
@@ -187,22 +187,22 @@ microsimulation <- function(maxyear = 2002,
           dplyr::mutate(
             year = y,
             agecat = cut(
-              age,
+              .data$age,
               breaks = c(0, 24, 64, 100),
               labels = c("18-24", "25-64", "65+")
             ),
-            education = ifelse(agecat == "18-24" &
-                                 education == "College", "SomeC", education)
+            education = ifelse(.data$agecat == "18-24" &
+                               .data$education == "College", "SomeC", .data$education)
           ) %>%
           dplyr::group_by(dplyr::across(dplyr::all_of(c(
             full_strata, "alc_cat"
           ))), .drop = FALSE) %>%
           dplyr::reframe(n = dplyr::n(),
-                         hed_prop = mean(hed_binary, na.rm = TRUE),
-                         n_hed = sum(hed_binary)) %>%
+                         hed_prop = mean(.data$hed_binary, na.rm = TRUE),
+                         n_hed = sum(.data$hed_binary)) %>%
           dplyr::group_by(dplyr::across(dplyr::all_of(full_strata)), .drop = FALSE) %>%
           dplyr::mutate(
-            propsimulation = n / sum(n),
+            propsimulation = .data$n / sum(.data$n),
             seed = seed,
             nunc = nunc,
             policymodel = as.character(policymodel)
@@ -216,12 +216,12 @@ microsimulation <- function(maxyear = 2002,
 
         Summary[["hed"]][[paste(y)]] <- data %>%
           dplyr::mutate(year = y,
-                        agecat = cut(age, breaks = c(0, 20, 34, 64, 100), labels = c("18-20", "21-34", "35-64", "65+")),
-                        education = ifelse(agecat == "18-20" & education == "College", "SomeC", education)) %>%
+                        agecat = cut(.data$age, breaks = c(0, 20, 34, 64, 100), labels = c("18-20", "21-34", "35-64", "65+")),
+                        education = ifelse(.data$agecat == "18-20" & .data$education == "College", "SomeC", .data$education)) %>%
           dplyr::group_by(dplyr::across(dplyr::all_of(full_strata)), .drop = FALSE) %>%
           dplyr::reframe(n = dplyr::n(),
-                         n_hed = sum(hed_binary),
-                         hed_prop = mean(hed_binary, na.rm = TRUE),
+                         n_hed = sum(.data$hed_binary),
+                         hed_prop = mean(.data$hed_binary, na.rm = TRUE),
                          seed = seed,
                          nunc = nunc,
                          policymodel = as.character(policymodel)
@@ -245,10 +245,10 @@ microsimulation <- function(maxyear = 2002,
 
     full_strata <- strata[["mortality"]]
     rsummary <- data_list$deaths_REST %>%
-      dplyr::mutate(agecat = cut(age, breaks = age_breaks, labels = age_groups)) %>%
+      dplyr::mutate(agecat = cut(.data$age, breaks = age_breaks, labels = age_groups)) %>%
       dplyr::group_by(dplyr::across(dplyr::all_of(full_strata))) %>%
-      dplyr::summarise(mort_REST = sum(mort_REST),
-                       yll_REST = sum(yll_REST))
+      dplyr::summarise(mort_REST = sum(.data$mort_REST),
+                       yll_REST = sum(.data$yll_REST))
     RestSummary[[paste(y)]] <- rsummary
 
     # if diseases are specified in the disease vector, simulate mortality from those specific diseases
@@ -258,14 +258,14 @@ microsimulation <- function(maxyear = 2002,
 
       data <- data %>%
         dplyr::mutate(
-          ageCAT = cut(age, breaks = age_breaks, labels = age_groups),
-          cat = paste0(sex, ageCAT, race, education)
+          ageCAT = cut(.data$age, breaks = age_breaks, labels = age_groups),
+          cat = paste0(.data$sex, .data$ageCAT, .data$race, .data$education)
         ) %>%
-        dplyr::select(-ageCAT)
+        dplyr::select(-.data$ageCAT)
 
       # merge mortality rates at the theoretical minimal risk exposure level
       rates <- base_rates %>%
-        dplyr::filter(year == y) %>%
+        dplyr::filter(.data$year == y) %>%
         dplyr::select(cat, dplyr::all_of(paste0("rate_", diseases)))
       data <- dplyr::left_join(data, rates, by = c("cat"))
 
@@ -299,11 +299,11 @@ microsimulation <- function(maxyear = 2002,
     }
 
     # transition education for individuals aged 34 and under
-    totransition <- data %>% dplyr::filter(age <= 34)
+    totransition <- data %>% dplyr::filter(.data$age <= 34)
     totransition <- education_update(data = totransition, covid_scenario=COVID_specific_tps, cyear=y,
                                      education_transitions = education_transitions,
                                      education_transitions_covid = education_transitions_covid)
-    tostay <- data %>% dplyr::filter(age > 34)
+    tostay <- data %>% dplyr::filter(.data$age > 34)
     data <- rbind(totransition, tostay)
 
     # update alcohol use categories
@@ -314,7 +314,7 @@ microsimulation <- function(maxyear = 2002,
       if (is.null(catcontmodel) == FALSE) {
         log_verbosity("Sample grams per day for individuals previously transitioned", level = 1, type = "info")
         data <- allocate_gramsperday_sampled(data, catcontmodel)
-        data <- data %>% dplyr::mutate(drinkingstatus = ifelse(alc_gpd == 0, FALSE, TRUE))
+        data <- data %>% dplyr::mutate(drinkingstatus = ifelse(.data$alc_gpd == 0, FALSE, TRUE))
         # allocate former drinker status - note: this is not tracked over time
         data <- update_former_drinker(data)
       } else if (is.null(catcontmodel) == TRUE) {
@@ -323,10 +323,10 @@ microsimulation <- function(maxyear = 2002,
     }
 
     # age everyone by 1 year
-    data <- data %>% dplyr::mutate(age = age + 1)
+    data <- data %>% dplyr::mutate(age = .data$age + 1)
 
     # remove anyone over 79
-    data <- subset(data, age <= 79)
+    data <- data[data$age <= 79, ]
 
     # add 18-year olds, add new migrants and remove emigrants
     if (y <= 2030) {

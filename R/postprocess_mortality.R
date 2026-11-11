@@ -6,7 +6,7 @@
 #' @param full_strata vector of individual characteristics to be used for grouping data
 #' @param mort_data option to include observed cause- and subgroup-specific death counts from external empirical data
 #' @return a long-format data frame suitable for comparison of simulated and observed mortality outcomes by cause
-#' @importFrom dplyr %>% mutate select group_by ungroup summarise left_join case_when all_of rename
+#' @importFrom dplyr %>% mutate select group_by ungroup summarise left_join case_when all_of rename .data
 #' @importFrom tidyr pivot_wider pivot_longer
 #' @keywords microsimulation, mortality, output
 #' @export
@@ -43,23 +43,23 @@ postprocess_mortality <- function(DiseaseSummary, full_strata = c("sex", "agecat
           grepl("Others", cat) ~ "Others"
         )
       ) %>%
-      dplyr::group_by(year, sex, agecat, race, education, name) %>%
+      dplyr::group_by(.data$year, .data$sex, .data$agecat, .data$race, .data$education, .data$name) %>%
       # sum up observed mortality data by subgroup
-      dplyr::summarise(mortality_observed = sum(value)) %>%
-      dplyr::mutate(name = gsub("mort", "", name)) %>%
+      dplyr::summarise(mortality_observed = sum(.data$value)) %>%
+      dplyr::mutate(name = gsub("mort", "", .data$name)) %>%
       dplyr::mutate(
         education = ifelse(
-          education == "Some",
+          .data$education == "Some",
           "SomeC",
-          ifelse(education == "Coll", "College", education)
+          ifelse(.data$education == "Coll", "College", .data$education)
         ),
-        cat = paste0(sex, agecat, race, education)
+        cat = paste0(.data$sex, .data$agecat, .data$race, .data$education)
       ) %>%
       dplyr::ungroup() %>%
-      dplyr::select(year, agecat, sex, race, education, name, mortality_observed) %>%
+      dplyr::select(.data$year, .data$agecat, .data$sex, .data$race, .data$education, .data$name, .data$mortality_observed) %>%
       tidyr::pivot_wider(
-        names_from = name,
-        values_from = mortality_observed,
+        names_from = .data$name,
+        values_from = .data$mortality_observed,
         names_prefix = "mortality_observed_"
       )
 
@@ -71,7 +71,7 @@ postprocess_mortality <- function(DiseaseSummary, full_strata = c("sex", "agecat
 
   # rename popcount
   Diseases <- Diseases %>%
-    dplyr::rename(popcount = n)
+    dplyr::rename(popcount = .data$n)
 
   # reshape mortality output into long-format table
   long_format <- Diseases %>%
@@ -84,16 +84,16 @@ postprocess_mortality <- function(DiseaseSummary, full_strata = c("sex", "agecat
     ) %>%
     dplyr::mutate(
       type =  dplyr::case_when(
-        grepl("mortality_observed_", name) ~ "mortality_observed",
-        grepl("mort_", name) ~ "mortality_simulated",
-        grepl("yll_", name) ~ "yll_simulated"
+        grepl("mortality_observed_", .data$name) ~ "mortality_observed",
+        grepl("mort_", .data$name) ~ "mortality_simulated",
+        grepl("yll_", .data$name) ~ "yll_simulated"
       ),
-      cause = gsub("mortality_observed_", "", name),
-      cause = gsub("mort_", "", cause),
-      cause = gsub("yll_", "", cause)
+      cause = gsub("mortality_observed_", "", .data$name),
+      cause = gsub("mort_", "", .data$cause),
+      cause = gsub("yll_", "", .data$cause)
     ) %>%
-    dplyr::select(-name) %>%
-    tidyr::pivot_wider(names_from = type, values_from = value)
+    dplyr::select(-.data$name) %>%
+    tidyr::pivot_wider(names_from = .data$type, values_from = .data$value)
 
   if (!is.null(mort_data)) {
     variables <- c(full_strata, "year", "cause", "popcount", "mortality_observed",
@@ -102,9 +102,9 @@ postprocess_mortality <- function(DiseaseSummary, full_strata = c("sex", "agecat
     long_format <- long_format %>%
       dplyr::select(all_of(variables)) %>%
       dplyr::rename(
-        observed_mortality_n = mortality_observed,
-        simulated_mortality_n = mortality_simulated,
-        simulated_yll_n = yll_simulated
+        observed_mortality_n = .data$mortality_observed,
+        simulated_mortality_n = .data$mortality_simulated,
+        simulated_yll_n = .data$yll_simulated
       )
   } else{
     variables <- c(full_strata, "year", "cause", "popcount",
@@ -113,14 +113,14 @@ postprocess_mortality <- function(DiseaseSummary, full_strata = c("sex", "agecat
     long_format <- long_format %>%
       dplyr::select(all_of(variables)) %>%
       dplyr::rename(
-        simulated_mortality_n = mortality_simulated,
-        simulated_yll_n = yll_simulated
+        simulated_mortality_n = .data$mortality_simulated,
+        simulated_yll_n = .data$yll_simulated
       )
   }
 
   if("sex" %in% full_strata) {
     long_format <- long_format %>%
-      dplyr::mutate(sex = ifelse(sex == "f", "Women", "Men"))
+      dplyr::mutate(sex = ifelse(.data$sex == "f", "Women", "Men"))
   }
 
 
