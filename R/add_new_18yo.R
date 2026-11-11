@@ -12,6 +12,8 @@
 #' @param cyear current simulation year
 #' @return a data frame identical to \code{data}, with newly added 18-year-old individuals appended to the synthetic
 #' population
+#' @importFrom dplyr %>% mutate filter select group_by ungroup left_join tally do sample_n
+#' @importFrom tidyr drop_na
 #' @keywords births, population entry, 18-year-old population
 #' @export
 add_new_18yo <- function(data, migration_rates, cyear, svy_data) {

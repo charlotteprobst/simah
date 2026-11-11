@@ -4,6 +4,7 @@
 #' @param data a data frame containing the synthetic population, with columns \code{alc_gpd}, \code{hed_binary} and \code{formerdrinker}
 #' @param risk_param a data frame containing the risk function parameters for all diseases
 #' @return a data frame identical to \code{data} with an additional column containing \code{RR_UIJ} values
+#' @importFrom dplyr %>% mutate case_when
 #' @keywords other unintentional injuries, UIJ, RR
 #' @export
 assign_rr_uij <- function(data, risk_param) {

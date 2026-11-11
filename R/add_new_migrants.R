@@ -9,6 +9,8 @@
 #'                 \code{drinkingstatus}, \code{alc_gpd}, \code{BMI}, \code{income}, \code{formerdrinker}, \code{education_detailed}, \code{alc_cat}
 #' @param cyear current simulation year
 #' @return a data frame identical to \code{data}, with newly added inward migrant individuals appended to the synthetic population
+#' @importFrom dplyr %>% mutate filter select group_by ungroup left_join tally do sample_n
+#' @importFrom tidyr drop_na
 #' @keywords inward migration, population entry
 #' @export
 add_new_migrants <- function(data, migration_rates, cyear, svy_data) {

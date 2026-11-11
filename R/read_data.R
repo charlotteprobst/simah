@@ -24,6 +24,9 @@
 #'      with at least columns \code{agecat}, \code{race}, \code{sex}, \code{year}, \code{birthrate}, \code{migrationinrate},
 #'      and \code{migrationoutrate}
 #' hed_model_list a list with machine learning models used to annually update heavy episodic drinking (HED) status
+#' @importFrom yaml read_yaml
+#' @importFrom readr read_rds
+#' @importFrom xgboost xgb.load
 #' @export
 read_data <- function(config_path = NULL) {
 

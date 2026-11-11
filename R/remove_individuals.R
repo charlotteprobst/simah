@@ -9,6 +9,8 @@
 #' @param inflation_factors a vector with inflation factors that were applied to age categories with low
 #' death counts (in \code{age_inflated}) to stabilize mortality simulation
 #' @return the synthetic population remaining after removing individuals who died from alcohol-related causes of death
+#' @importFrom dplyr %>% mutate filter select group_by ungroup add_tally do
+#' @importFrom rlang sym
 #' @keywords microsimulation, mortality, cause of death
 #' @export
 remove_individuals <- function(data, disease, age_inflated, inflation_factors) {

@@ -6,6 +6,8 @@
 #' @param full_strata vector of individual characteristics to be used for grouping data
 #' @param mort_data option to include observed cause- and subgroup-specific death counts from external empirical data
 #' @return a long-format data frame suitable for comparison of simulated and observed mortality outcomes by cause
+#' @importFrom dplyr %>% mutate select group_by ungroup summarise left_join case_when all_of rename
+#' @importFrom tidyr pivot_wider pivot_longer
 #' @keywords microsimulation, mortality, output
 #' @export
 postprocess_mortality <- function(DiseaseSummary, full_strata = c("sex", "agecat", "education", "race"), mort_data = NULL) {

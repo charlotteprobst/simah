@@ -36,6 +36,9 @@
 #' @param datalist a list of dataframes with data that can be provided manually, and is required for this package.
 #' This input is set to NULL by default, which means that the data will be loaded instead by the read_data function.
 #' @return a list containing outputs specified in \code{output}, summarized by \code{strata}, for each simulated year
+#' @importFrom dplyr %>% mutate filter select group_by ungroup summarise left_join all_of across reframe bind_rows
+#' @importFrom stats sd
+#' @importFrom rlang sym is_empty
 #' @keywords microsimulation, main function
 #' @export
 microsimulation <- function(maxyear = 2002,

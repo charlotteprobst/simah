@@ -14,20 +14,14 @@ Maintainer: Charlotte Probst <charlotte.probst@camh.ca>
 License: LGPL (>= 3) + file LICENSE
 Imports: 
     dplyr,
-    data.table,
     faux,
     xgboost,
-    lhs,
-    magrittr,
-    purrr,
     readr,
     rlang,
     stats,
     tidyr,
     sampling,
     tidyselect,
-    truncnorm,
-    utils,
     yaml
 Suggests:
     testthat (>= 3.0.0),

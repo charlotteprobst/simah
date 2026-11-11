@@ -7,6 +7,8 @@
 #'                        with at least columns \code{agecat}, \code{race}, \code{sex}, \code{year}, and \code{migrationoutrate}
 #' @param cyear current simulation year
 #' @return the synthetic population remaining after removing outward migrant individuals
+#' @importFrom dplyr %>% mutate filter select group_by summarise left_join do sample_n
+#' @importFrom tidyr drop_na
 #' @keywords outward migration, population exit
 #' @export
 remove_emigrants <- function(data, migration_rates, cyear) {

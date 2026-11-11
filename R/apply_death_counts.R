@@ -6,6 +6,9 @@
 #' @param diseases a vector of specific causes of death that are modelled explicitly in relation to alcohol use
 #' @return a list with (1) a data frame containing the synthetic population remaining after removing individuals
 #' who died from causes that are not explicitly modelled; and (2) a data frame of individuals who died
+#' @importFrom dplyr %>% mutate filter select group_by summarise left_join do
+#' @importFrom tidyr pivot_wider pivot_longer complete
+#' @importFrom stats runif
 #' @keywords microsimulation, mortality
 #' @export
 apply_death_counts <- function(data, mort_data, cyear, diseases) {

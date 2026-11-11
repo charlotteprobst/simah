@@ -6,6 +6,8 @@
 #' @param cons_elasticity_se a vector containing standard errors corresponding to consumption elasticities for beer, wine, spirits
 #' @param r_sim_obs correlation between baseline consumption and individual response to price change, numeric
 #' @return a data frame identical to \code{data} but with updated \code{alc_gpd} values.
+#' @importFrom dplyr %>% mutate select
+#' @importFrom faux rnorm_pre
 #' @keywords tax policy
 #' @export
 apply_basic_policy <- function(data, cons_elasticity, cons_elasticity_se, r_sim_obs) {

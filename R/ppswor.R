@@ -10,6 +10,8 @@
 #' @param fitness a vector containing the fitness of the individuals in the population
 #' @param n the desired number of individuals to be selected
 #' @return a vector with the IDs of the individuals to be removed
+#' @importFrom stats runif
+#' @importFrom sampling inclusionprobabilities
 #' @export
 ppswor <- function(fitness, n) {
   pi <- sampling::inclusionprobabilities(fitness, n)

@@ -5,6 +5,8 @@
 #'                \code{race} and \code{education_detailed}
 #' @return a data frame identical to \code{data} with additional columns containing \code{agecat}, \code{state},
 #'          \code{cat} and \code{prob} values
+#' @importFrom dplyr case_when
+#' @importFrom stats runif
 #' @keywords education, COVID-19 education transition model
 #' @export
 setup_education_covid <- function(data) {

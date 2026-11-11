@@ -4,6 +4,9 @@
 #' @param data a data frame containing the synthetic population, with at least columns \code{alc_cat}, \code{alc_gpd}, \code{formerdrinker}, \code{sex}, \code{age}, \code{education}, and \code{race}
 #' @param model a data frame with parameters from alcohol transition ordinal regression model
 #' @return a data frame containing transition probabilities for each population subgroup and by current alcohol use category
+#' @importFrom dplyr %>% mutate select group_by summarise
+#' @importFrom tidyr pivot_wider
+#' @importFrom stats sd
 #' @keywords microsimulation, alcohol
 #' @export
 prob_alcohol_transition <- function(data, model) {

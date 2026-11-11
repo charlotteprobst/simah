@@ -10,6 +10,9 @@
 #' @param full_strata vector of individual characteristics to be used for grouping data
 #' @param age_breaks used to generate age groups and specifies the age cutting points
 #' @param age_groups used to generate age groups and specifies the group names
+#' @importFrom dplyr %>% mutate group_by summarise left_join all_of across tally
+#' @importFrom tidyr replace_na
+#' @importFrom rlang sym :=
 #' @export
 summary_disease <- function(data,
                             rsummary,

@@ -6,6 +6,7 @@
 #' @param data a data frame containing the synthetic population
 #' @param catcontmodel a data frame containing the parameters of the beta distributions
 #' @return a data frame identical to \code{data} with updated \code{alc_gpd}
+#' @importFrom dplyr %>% mutate filter select group_by ungroup left_join case_when do
 #' @keywords microsimulation, continuous, grams per day
 #' @export
 allocate_gramsperday_sampled <- function(data, catcontmodel) {

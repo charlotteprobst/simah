@@ -3,6 +3,7 @@
 #' @param data a data frame containing the synthetic population, with columns \code{alc_gpd}, \code{hed_binary} and \code{formerdrinker}
 #' @param risk_param a data frame containing the risk function parameters for all diseases.
 #' @return a data frame identical to \code{data} with an additional column containing \code{RR_MVACC} values.
+#' @importFrom dplyr %>% mutate case_when
 #' @keywords motor vehicle injuries, MVACC, RR
 #' @export
 assign_rr_mvacc <- function(data, risk_param) {

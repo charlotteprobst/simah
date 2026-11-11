@@ -6,6 +6,7 @@
 #' @param hed_model2 ML-driven model everyone except young and old men
 #' @param hed_model3 ML-driven model for old men
 #' @return synthetic population, with an updated HED variable
+#' @importFrom dplyr %>% mutate filter case_when
 #' @keywords heavy episodic drinking, HED, machine learning
 #' @export
 update_hed <- function(data, hed_model1, hed_model2, hed_model3){

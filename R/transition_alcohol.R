@@ -4,6 +4,9 @@
 #' @param data a data frame containing the synthetic population
 #' @param model a data frame containing the coefficients of the ordinal regression model
 #' @return a data frame identical to \code{data} with updated \code{alc_cat}
+#' @importFrom dplyr %>% mutate select case_when
+#' @importFrom tidyr pivot_wider
+#' @importFrom stats runif sd
 #' @keywords microsimulation, alcohol transition, ordinal regression model
 #' @export
 transition_alcohol <- function(data, model) {

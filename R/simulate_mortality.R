@@ -7,6 +7,9 @@
 #'             risk and mortality rates for all alcohol-related causes of death specified in \code{diseases}
 #' @param diseases a vector of specific causes of death that are modelled explicitly in relation to alcohol use
 #' @return the synthetic population with additional variables that stage individuals to die from explicitly modelled causes of death
+#' @importFrom dplyr %>% mutate if_else
+#' @importFrom stats runif
+#' @importFrom rlang sym quo_name := is_empty
 #' @keywords microsimulation, mortality, cause of death, risk
 #' @export
 simulate_mortality <- function(data, diseases) {

@@ -5,6 +5,8 @@
 #' @param data a data frame containing the synthetic population, with minimum variables \code{drinkingstatus},
 #' \code{formerdrinker}, \code{agecat}, and \code{sex}
 #' @return the synthetic population with updated former drinker status for abstainers
+#' @importFrom dplyr %>% mutate filter select group_by ungroup left_join tally
+#' @importFrom stats runif
 #' @keywords microsimulation, former drinker, abstainer
 #' @export
 update_former_drinker <- function(data){

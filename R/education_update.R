@@ -9,6 +9,7 @@
 #' @param education_transitions_covid a data frame of COVID cumulative transition probabilities for each population category and
 #'      destination education state, with at least \code{cat}, \code{StateTo} and \code{cumsum}
 #' @return the synthetic population with education_detailed column updated
+#' @importFrom dplyr %>% group_by do case_when ungroup select
 #' @keywords microsimulation and education
 #' @export
 education_update <- function(data, covid_scenario, cyear, education_transitions, education_transitions_covid) {
