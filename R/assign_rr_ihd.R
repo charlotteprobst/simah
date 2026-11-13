@@ -4,6 +4,7 @@
 #' @param data a data frame containing the synthetic population, with columns \code{alc_gpd} and \code{formerdrinker}
 #' @param risk_param a data frame containing the risk function parameters for all diseases
 #' @return a data frame identical to \code{data} with an additional column containing \code{RR_IHD} values
+#' @importFrom dplyr %>% mutate case_when
 #' @keywords ischemic heart disease, ischaemic heart disease, IHD, RR
 #' @export
 assign_rr_ihd <- function(data, risk_param) {

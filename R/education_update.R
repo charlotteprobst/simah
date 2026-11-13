@@ -1,5 +1,6 @@
 #' @title Education update
 #' @description Updates education categories for the individuals in data
+#' @param data a data frame containing the synthetic baseline population
 #' @param covid_scenario indicator specifying which COVID scenario to model; 0 (= non-COVID),
 #' 1 (non-COVID before 2020 and after 2022 / COVID in 2020-2022), or 2 (= non-COVID before 2020 / COVID after 2020)
 #' @param cyear current simulation year
@@ -8,6 +9,7 @@
 #' @param education_transitions_covid a data frame of COVID cumulative transition probabilities for each population category and
 #'      destination education state, with at least \code{cat}, \code{StateTo} and \code{cumsum}
 #' @return the synthetic population with education_detailed column updated
+#' @importFrom dplyr %>% group_by do case_when ungroup select .data
 #' @keywords microsimulation and education
 #' @export
 education_update <- function(data, covid_scenario, cyear, education_transitions, education_transitions_covid) {
@@ -37,28 +39,28 @@ education_update <- function(data, covid_scenario, cyear, education_transitions,
     # apply transitions using covid TPs permanently after 2020
     if (cyear >= 2020) {
       log_verbosity("Processing education transitions for post-Covid years", level = 1, type = "info")
-      data <- data %>% dplyr::group_by(cat) %>%
+      data <- data %>% dplyr::group_by(.data$cat) %>%
         dplyr::do(transition_education(., education_transitions_covid))
     } else {
       log_verbosity("Processing education transitions for pre-Covid years", level = 1, type = "info")
-      data <- data %>% dplyr::group_by(cat) %>%
+      data <- data %>% dplyr::group_by(.data$cat) %>%
         dplyr::do(transition_education(., education_transitions))
     }
   } else if (covid_scenario == 1) {
     # apply covid TPs to real covid time
     if (cyear >= 2020 & cyear <= 2022) {
       log_verbosity("Processing education transitions during Covid years", level = 1, type = "info")
-      data <- data %>% dplyr::group_by(cat) %>%
+      data <- data %>% dplyr::group_by(.data$cat) %>%
         dplyr::do(transition_education(., education_transitions_covid))
     } else {
       log_verbosity("Processing education transitions excluding Covid years", level = 1, type = "info")
-      data <- data %>% dplyr::group_by(cat) %>%
+      data <- data %>% dplyr::group_by(.data$cat) %>%
         dplyr::do(transition_education(., education_transitions))
     }
   } else {
     # apply tps for pre-covid throughout
     log_verbosity("Processing education transitions", level = 1, type = "info")
-    data <- data %>% dplyr::group_by(cat) %>%
+    data <- data %>% dplyr::group_by(.data$cat) %>%
       dplyr::do(transition_education(., education_transitions))
   }
 
@@ -75,7 +77,7 @@ education_update <- function(data, covid_scenario, cyear, education_transitions,
     )
 
   # Removes the any grouping that was applied to the data frame and also removes four columns
-  data <- data %>% dplyr::ungroup() %>% dplyr::select(-c(prob, state, newED, cat))
+  data <- data %>% dplyr::ungroup() %>% dplyr::select(-c(.data$prob, .data$state, .data$newED, .data$cat))
 
   return(data)
 }

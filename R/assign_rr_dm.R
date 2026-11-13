@@ -4,6 +4,7 @@
 #' @param data a data frame containing the synthetic population, with columns \code{sex}, \code{alc_gpd} and \code{formerdrinker}
 #' @param risk_param a data frame containing the risk function parameters for all diseases
 #' @return a data frame identical to \code{data} with an additional column containing \code{RR_DM} values
+#' @importFrom dplyr %>% mutate case_when .data
 #' @keywords diabetes mellitus, DM, RR
 #' @export
 assign_rr_dm <- function(data, risk_param) {
@@ -40,9 +41,9 @@ assign_rr_dm <- function(data, risk_param) {
       RR_DM = dplyr::case_when(
         sex == "m" & formerdrinker == TRUE ~ exp(DM_FORMERDRINKER_MEN),
         sex == "f" & formerdrinker == TRUE ~ exp(DM_FORMERDRINKER_WOMEN),
-        TRUE ~ RR_DM
+        TRUE ~ .data$RR_DM
       ),
-      RR_DM = pmin(RR_DM, 30)
+      RR_DM = pmin(.data$RR_DM, 30)
     )
   return(data)
 }

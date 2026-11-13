@@ -3,6 +3,8 @@ library(testthat)
 
 options(microsim_verbosity = 0)
 
+# devtools::load_all(".")
+
 # Load necessary mock data
 mort_data <- readr::read_rds(system.file("extdata", "mort_data.rds", package = "simah"))
 

@@ -4,6 +4,7 @@
 #' @param data a data frame containing a subgroup of synthetic population corresponding to a particular category \code{cat}
 #' @param transitions a data frame of cumulative transition probabilities for each population category and destination education state.
 #' @return a data frame identical to \code{data} with an additional column \code{newED} containing the assigned educational attainment level.
+#' @importFrom dplyr %>% case_when filter
 #' @keywords education transition, markov model
 #' @export
 transition_education <- function(data, transitions) {

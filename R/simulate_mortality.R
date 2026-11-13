@@ -7,6 +7,9 @@
 #'             risk and mortality rates for all alcohol-related causes of death specified in \code{diseases}
 #' @param diseases a vector of specific causes of death that are modelled explicitly in relation to alcohol use
 #' @return the synthetic population with additional variables that stage individuals to die from explicitly modelled causes of death
+#' @importFrom dplyr %>% mutate if_else .data
+#' @importFrom stats runif
+#' @importFrom rlang sym quo_name := is_empty
 #' @keywords microsimulation, mortality, cause of death, risk
 #' @export
 simulate_mortality <- function(data, diseases) {
@@ -30,7 +33,7 @@ simulate_mortality <- function(data, diseases) {
       if (disease == "AUD") {
         data <- data %>%
           dplyr::mutate(
-            !!risk_expr := dplyr::if_else(drinkingstatus == FALSE & formerdrinker == FALSE,FALSE,
+            !!risk_expr := dplyr::if_else(.data$drinkingstatus == FALSE & .data$formerdrinker == FALSE,FALSE,
                                           !!RR_expr * !!rate_expr
             )
           )
@@ -46,7 +49,7 @@ simulate_mortality <- function(data, diseases) {
       if (disease == "AUD") {
         data <- data %>%
           dplyr::mutate(
-            !!risk_expr := dplyr::if_else(drinkingstatus == FALSE & formerdrinker == FALSE,FALSE,
+            !!risk_expr := dplyr::if_else(.data$drinkingstatus == FALSE & .data$formerdrinker == FALSE,FALSE,
                                           !!RR_expr * !!rate_expr+!!prev_risk_expr
             )
           )
@@ -96,7 +99,7 @@ simulate_mortality <- function(data, diseases) {
       data <- data %>%
         # stage individual death by comparing random value to stacked cause-specific mortality risks
         dplyr::mutate(
-          !!mort_expr := ifelse(!!risk_expr > prob, 1, 0)
+          !!mort_expr := ifelse(!!risk_expr > .data$prob, 1, 0)
         )
     } else {
       # extract name of preceding (cumulative) individual risk
@@ -104,13 +107,13 @@ simulate_mortality <- function(data, diseases) {
       data <- data %>%
         dplyr::mutate(
           # stage individual death by comparing random value to stacked cause-specific mortality risks
-          !!mort_expr := ifelse(!!risk_expr > prob & !!prev_risk_expr < prob, 1, 0)
+          !!mort_expr := ifelse(!!risk_expr > .data$prob & !!prev_risk_expr < .data$prob, 1, 0)
         )
     }
     data <- data %>%
       dplyr::mutate(
         # calculate years of life lost (YLL) if individual is aged below 75 years
-        !!yll_expr := ifelse(!!mort_expr == 1 & age < 75, 75 - age, 0)
+        !!yll_expr := ifelse(!!mort_expr == 1 & .data$age < 75, 75 - .data$age, 0)
       )
   }
 
