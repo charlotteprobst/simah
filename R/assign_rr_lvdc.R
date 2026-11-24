@@ -6,6 +6,7 @@
 #' @param data a data frame containing the synthetic population, with columns \code{sex}, \code{alc_gpd} and \code{formerdrinker}
 #' @param risk_param a data frame containing the risk function parameters for all diseases
 #' @return a data frame identical to \code{data} with an additional column containing \code{RR_LVDC} values
+#' @importFrom dplyr %>% mutate case_when .data
 #' @keywords liver cirrhosis, LVDC, main pathway, RR
 #' @export
 assign_rr_lvdc <- function(data, risk_param) {
@@ -30,7 +31,7 @@ assign_rr_lvdc <- function(data, risk_param) {
         sex == "f" & alc_gpd >= gpd_ref_f ~ exp(0 + B_LVDC1_WOMEN * gpd_ref_f   + B_LVDC2_WOMEN * (gpd_ref_f ^ 2)),
         TRUE ~ NA  # Explicit catch-all
       ),
-      RR_LVDC = ifelse(formerdrinker == 1, exp(LVDC_FORMERDRINKER), RR_LVDC)
+      RR_LVDC = ifelse(.data$formerdrinker == 1, exp(LVDC_FORMERDRINKER), .data$RR_LVDC)
     )
 
   return(data)

@@ -1,6 +1,5 @@
 # simah: a microsimulation model for estimating the impact of alcohol control policies on population health 
 
-[![GitHub release (latest by date)](https://shields.io)](https://github.com/charlotteprobst/simah/releases/tag/v1.0.1)
 [![Tests](https://github.com/charlotteprobst/simah/actions/workflows/tests.yml/badge.svg)](https://github.com/charlotteprobst/simah/actions/workflows/tests.yml)
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 
@@ -43,7 +42,7 @@ Rscript -e "devtools::load_all('.')"
 
 ### Using Conda
 ```bash
-conda env create -f simah_env.yaml
+conda env create -f conda/simah_env.yaml
 conda activate simah_r_env
 ```
 

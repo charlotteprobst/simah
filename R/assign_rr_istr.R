@@ -3,6 +3,7 @@
 #' @param data a data frame containing the synthetic population, with columns \code{alc_gpd} and \code{formerdrinker}
 #' @param risk_param a data frame containing the risk function parameters for all diseases.
 #' @return a data frame identical to \code{data} with an additional column containing \code{RR_ISTR} values.
+#' @importFrom dplyr %>% mutate case_when .data
 #' @keywords ischaemic stroke, ISTR, RR
 #' @export
 assign_rr_istr <- function(data, risk_param) {
@@ -25,7 +26,7 @@ assign_rr_istr <- function(data, risk_param) {
         alc_gpd >  48 ~ exp(B_ISTR4),
         TRUE ~ NA  # Explicit catch-all
       ),
-      RR_ISTR = ifelse(formerdrinker == TRUE, exp(ISTR_FORMERDRINKER), RR_ISTR)
+      RR_ISTR = ifelse(.data$formerdrinker == TRUE, exp(ISTR_FORMERDRINKER), .data$RR_ISTR)
     )
 
   return(data)

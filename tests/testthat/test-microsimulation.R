@@ -3,6 +3,8 @@ library(testthat)
 
 options(microsim_verbosity = 0)
 
+# devtools::load_all(".")
+
 # defaults
 diseases <- c("AUD", "DM", "HLVDC", "HYPHD", "IHD", "IJ", "ISTR", "LVDC", "MVACC", "UIJ")
 inflation_factors <- c(28, 3)

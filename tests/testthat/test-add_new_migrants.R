@@ -3,6 +3,8 @@ library(testthat)
 
 options(microsim_verbosity = 0)
 
+# devtools::load_all(".")
+
 # Load necessary mock data
 basepop <- readr::read_rds(system.file("extdata", "data.rds", package = "simah"))
 migration_rates <- readr::read_rds(system.file("extdata", "migration_rates.rds", package = "simah"))
