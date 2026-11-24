@@ -1,6 +1,10 @@
 # Load testthat library
 library(testthat)
 
+options(microsim_verbosity = 0)
+
+# devtools::load_all(".")
+
 # Load necessary mock data
 basepop <- readr::read_rds(system.file("extdata", "data.rds", package = "simah"))
 alcohol_transitions <- readr::read_rds(system.file("extdata", "alcohol_transitions.rds", package = "simah"))

@@ -85,7 +85,7 @@ jobs:
         shell: Rscript {0}
 
       # Step 7: R CMD check
-      - name: R CMD check
+      - name: R CMD check --as-cran
         run: |
           # Run checks
           devtools::check(error_on = "never")

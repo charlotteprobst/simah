@@ -2,6 +2,7 @@
 #' @description Updates the alcohol category for each individual in the synthetic population based on their sex and grams-per-day.
 #' @param data a data frame containing the synthetic population, with at least columns \code{sex} and \code{alc_gpd}.
 #' @return a data frame identical to \code{basepop} with updated \code{alc_cat} values.
+#' @importFrom dplyr %>% case_when mutate
 #' @keywords microsimulation, alcohol
 #' @export
 update_alcohol_cat <- function(data) {

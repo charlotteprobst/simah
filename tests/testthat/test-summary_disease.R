@@ -4,6 +4,8 @@ library(testthat)
 # Set verbosity to suppress warnings during tests
 options(microsim_verbosity = 0)
 
+# devtools::load_all(".")
+
 # 2. Define the test case
 test_that("summary_disease ", {
 

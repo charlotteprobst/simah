@@ -4,6 +4,8 @@ library(testthat)
 # Set verbosity to suppress warnings during tests
 options(microsim_verbosity = 0)
 
+# devtools::load_all(".")
+
 test_that("simulate_mortality warns when cumulative risk from multiple diseases exceeds 1", {
   n <- 10  # number of individuals
   test_data <- data.frame(

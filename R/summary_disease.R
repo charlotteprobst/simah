@@ -10,6 +10,9 @@
 #' @param full_strata vector of individual characteristics to be used for grouping data
 #' @param age_breaks used to generate age groups and specifies the age cutting points
 #' @param age_groups used to generate age groups and specifies the group names
+#' @importFrom dplyr %>% mutate group_by summarise left_join all_of across tally .data
+#' @importFrom tidyr replace_na
+#' @importFrom rlang sym :=
 #' @export
 summary_disease <- function(data,
                             rsummary,
@@ -27,22 +30,22 @@ summary_disease <- function(data,
     # generate and add the summary to the list with automatic naming
     summary_list[[paste0(disease)]] <- data %>%
       dplyr::mutate(
-        agecat = cut(age, breaks = age_breaks, labels = age_groups),
+        agecat = cut(.data$age, breaks = age_breaks, labels = age_groups),
         inflation_factor = ifelse(
-          agecat %in% age_inflated[[1]],
+          .data$agecat %in% age_inflated[[1]],
           inflation_factors[1],
-          ifelse(agecat %in% age_inflated[[2]], inflation_factors[2], NA)
+          ifelse(.data$agecat %in% age_inflated[[2]], inflation_factors[2], NA)
         )
       ) %>%
       dplyr::group_by(dplyr::across(dplyr::all_of(full_strata))) %>%
       dplyr::summarise(
-        !!paste0("mort_", disease) := sum(!!dplyr::sym(paste0("mort_", disease)) / inflation_factor),
-        !!paste0("yll_", disease) := sum(!!dplyr::sym(paste0("yll_", disease)) / inflation_factor)
+        !!paste0("mort_", disease) := sum(!!dplyr::sym(paste0("mort_", disease)) / .data$inflation_factor),
+        !!paste0("yll_", disease) := sum(!!dplyr::sym(paste0("yll_", disease)) / .data$inflation_factor)
       )
   }
 
   data_out <- data %>%
-    dplyr::mutate(agecat = cut(age, breaks = age_breaks, labels = age_groups)) %>%
+    dplyr::mutate(agecat = cut(.data$age, breaks = age_breaks, labels = age_groups)) %>%
     dplyr::group_by(dplyr::across(dplyr::all_of(full_strata))) %>%
     dplyr::tally() %>%
     dplyr::mutate(year = cyear)

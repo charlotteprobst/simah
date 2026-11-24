@@ -10,8 +10,6 @@ dependencies:
   - r-doparallel
   - r-remotes
   - r-rcpp         # Required for some dependencies
-  - r-truncnorm
-  - r-lhs
   - r-faux
   - r-xgboost
   - r-sampling
